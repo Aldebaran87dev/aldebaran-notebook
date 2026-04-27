@@ -14,7 +14,7 @@ export const TYP_CLR = { Digital: "#5bb8f5", Physical: "#f5855b", Work: "#c084fc
 export const TIM_CLR = { "< 5 min": "#6dde9e", "15 min": "#a8e6a3", "1 hr": "#e8c547", "2-4 hrs": "#f5a55b", "4+ hrs": "#f5855b", "Multi-day": "#ff6b6b", "Year+": "#cc4444" };
 
 export const GITHUB_DEFAULTS = {
-  owner: "aldebaran87",
+  owner: "Aldebaran87dev",
   repo:  "aldebaran-docs",
   path:  "notebook.json",
 };
