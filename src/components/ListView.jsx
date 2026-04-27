@@ -16,7 +16,7 @@ const SORTS = [
 ];
 
 const emptyFilters = () => ({
-  type: new Set(), status: new Set(), priority: new Set(),
+  type: new Set(), status: new Set(['Open', 'In Progress']), priority: new Set(),
   category: new Set(), time: new Set(),
 });
 
@@ -33,6 +33,8 @@ export default function ListView({ nb, onSelect }) {
       return next;
     });
   }
+
+  function resetFilters() { setFilters(emptyFilters()); }
 
   const filtered = useMemo(() => {
     let list = nb.entries;
@@ -54,23 +56,19 @@ export default function ListView({ nb, onSelect }) {
 
   return (
     <div>
-      <FilterBar filters={filters} onToggle={toggleFilter} />
+      <FilterBar
+        filters={filters} onToggle={toggleFilter} onReset={resetFilters}
+        sorts={SORTS} sortIdx={sortIdx} onSort={setSortIdx}
+      />
 
-      {/* Search + sort */}
-      <div style={{ display: 'flex', gap: 8, padding: '10px 16px', alignItems: 'center' }}>
+      {/* Search */}
+      <div style={{ padding: '10px 16px' }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="search..."
           style={searchInput}
         />
-        <button
-          onClick={() => setSortIdx(i => (i + 1) % SORTS.length)}
-          style={sortBtn}
-          title="Cycle sort order"
-        >
-          {SORTS[sortIdx].label}
-        </button>
       </div>
 
       {/* Count */}
