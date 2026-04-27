@@ -7,12 +7,10 @@ import { PRI_ORD, TIME_ORD } from '../constants';
 const STATUS_ORD = { Open: 0, 'In Progress': 1, Done: 2, Archived: 3 };
 
 const SORTS = [
-  { label: 'DATE ↓', fn: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt) },
-  { label: 'DATE ↑', fn: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt) },
+  { label: 'DATE',     fn: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt) },
   { label: 'PRIORITY', fn: (a, b) => PRI_ORD[a.priority] - PRI_ORD[b.priority] },
   { label: 'STATUS',   fn: (a, b) => STATUS_ORD[a.status] - STATUS_ORD[b.status] },
-  { label: 'TIME ↑',   fn: (a, b) => TIME_ORD[a.time] - TIME_ORD[b.time] },
-  { label: 'TIME ↓',   fn: (a, b) => TIME_ORD[b.time] - TIME_ORD[a.time] },
+  { label: 'TIME',     fn: (a, b) => TIME_ORD[a.time] - TIME_ORD[b.time] },
 ];
 
 const emptyFilters = () => ({
