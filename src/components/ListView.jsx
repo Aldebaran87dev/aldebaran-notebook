@@ -62,7 +62,7 @@ export default function ListView({ nb, onSelect }) {
 
   return (
     <div>
-      <div style={{ position: 'sticky', top: 48, zIndex: 5, background: S.bg }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 5, background: S.bg }}>
         <FilterBar
           filters={filters} onToggle={toggleFilter} onReset={resetFilters}
           sortKeys={SORT_KEYS} sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
