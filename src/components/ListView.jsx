@@ -6,12 +6,14 @@ import { PRI_ORD, TIME_ORD } from '../constants';
 
 const STATUS_ORD = { Open: 0, 'In Progress': 1, Done: 2, Archived: 3 };
 
-const SORTS = [
-  { label: 'DATE',     fn: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt) },
-  { label: 'PRIORITY', fn: (a, b) => PRI_ORD[a.priority] - PRI_ORD[b.priority] },
-  { label: 'STATUS',   fn: (a, b) => STATUS_ORD[a.status] - STATUS_ORD[b.status] },
-  { label: 'TIME',     fn: (a, b) => TIME_ORD[a.time] - TIME_ORD[b.time] },
-];
+const SORT_FNS = {
+  date:     (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
+  priority: (a, b) => PRI_ORD[a.priority]   - PRI_ORD[b.priority],
+  status:   (a, b) => STATUS_ORD[a.status]  - STATUS_ORD[b.status],
+  time:     (a, b) => TIME_ORD[a.time]      - TIME_ORD[b.time],
+};
+
+const SORT_KEYS = ['date', 'priority', 'status', 'time'];
 
 const emptyFilters = () => ({
   type: new Set(), status: new Set(['Open', 'In Progress']), priority: new Set(),
@@ -19,9 +21,10 @@ const emptyFilters = () => ({
 });
 
 export default function ListView({ nb, onSelect }) {
-  const [search,   setSearch]   = useState('');
-  const [sortIdx,  setSortIdx]  = useState(0);
-  const [filters,  setFilters]  = useState(emptyFilters);
+  const [search,  setSearch]  = useState('');
+  const [sortKey, setSortKey] = useState('date');
+  const [sortDir, setSortDir] = useState(-1); // -1 = desc, 1 = asc
+  const [filters, setFilters] = useState(emptyFilters);
 
   function toggleFilter(key, val) {
     setFilters(prev => {
@@ -33,6 +36,11 @@ export default function ListView({ nb, onSelect }) {
   }
 
   function resetFilters() { setFilters(emptyFilters()); }
+
+  function handleSort(key) {
+    if (key === sortKey) setSortDir(d => d * -1);
+    else { setSortKey(key); setSortDir(-1); }
+  }
 
   const filtered = useMemo(() => {
     let list = nb.entries;
@@ -49,17 +57,16 @@ export default function ListView({ nb, onSelect }) {
     if (filters.priority.size) list = list.filter(e => filters.priority.has(e.priority));
     if (filters.category.size) list = list.filter(e => filters.category.has(e.category));
     if (filters.time.size)     list = list.filter(e => filters.time.has(e.time));
-    return [...list].sort(SORTS[sortIdx].fn);
-  }, [nb.entries, search, filters, sortIdx]);
+    return [...list].sort((a, b) => SORT_FNS[sortKey](a, b) * sortDir);
+  }, [nb.entries, search, filters, sortKey, sortDir]);
 
   return (
     <div>
       <FilterBar
         filters={filters} onToggle={toggleFilter} onReset={resetFilters}
-        sorts={SORTS} sortIdx={sortIdx} onSort={setSortIdx}
+        sortKeys={SORT_KEYS} sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
       />
 
-      {/* Search */}
       <div style={{ padding: '10px 16px' }}>
         <input
           value={search}
@@ -69,7 +76,6 @@ export default function ListView({ nb, onSelect }) {
         />
       </div>
 
-      {/* Count */}
       <div style={{ padding: '0 16px 6px', fontSize: 11, color: S.muted, letterSpacing: 0.5 }}>
         {filtered.length} / {nb.entries.length}
       </div>
@@ -86,13 +92,7 @@ export default function ListView({ nb, onSelect }) {
 }
 
 const searchInput = {
-  flex: 1, background: S.surface2, border: `1px solid ${S.border}`,
+  width: '100%', background: S.surface2, border: `1px solid ${S.border}`,
   color: S.text, fontFamily: S.font, fontSize: 13,
   padding: '8px 12px', borderRadius: 6, outline: 'none',
-};
-
-const sortBtn = {
-  flex: 'none', background: S.surface2, border: `1px solid ${S.border}`,
-  color: S.accent, fontFamily: S.font, fontSize: 9, letterSpacing: 1,
-  padding: '8px 10px', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap',
 };
