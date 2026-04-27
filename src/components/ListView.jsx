@@ -77,7 +77,7 @@ export default function ListView({ nb, onSelect }) {
           />
         </div>
 
-        <div style={{ padding: '0 16px 6px', fontSize: 11, color: S.muted, letterSpacing: 0.5 }}>
+        <div style={{ padding: '0 16px 6px', fontSize: 11, color: S.muted, letterSpacing: 0.5, borderBottom: `1px solid ${S.border}` }}>
           {filtered.length} / {nb.entries.length}
         </div>
       </div>

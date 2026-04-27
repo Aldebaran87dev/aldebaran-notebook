@@ -11,7 +11,7 @@ const GROUPS = [
 
 export default function FilterBar({ filters, onToggle, onReset, sortKeys, sortKey, sortDir, onSort }) {
   return (
-    <div style={{ borderBottom: `1px solid ${S.border}`, padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
       {GROUPS.map(g => (
         <div key={g.key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: 9, color: '#555', letterSpacing: 1, minWidth: 52, flexShrink: 0 }}>{g.label}</span>
