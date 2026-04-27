@@ -62,22 +62,24 @@ export default function ListView({ nb, onSelect }) {
 
   return (
     <div>
-      <FilterBar
-        filters={filters} onToggle={toggleFilter} onReset={resetFilters}
-        sortKeys={SORT_KEYS} sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
-      />
-
-      <div style={{ padding: '10px 16px' }}>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="search..."
-          style={searchInput}
+      <div style={{ position: 'sticky', top: 48, zIndex: 5, background: S.bg }}>
+        <FilterBar
+          filters={filters} onToggle={toggleFilter} onReset={resetFilters}
+          sortKeys={SORT_KEYS} sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
         />
-      </div>
 
-      <div style={{ padding: '0 16px 6px', fontSize: 11, color: S.muted, letterSpacing: 0.5 }}>
-        {filtered.length} / {nb.entries.length}
+        <div style={{ padding: '10px 16px' }}>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="search..."
+            style={searchInput}
+          />
+        </div>
+
+        <div style={{ padding: '0 16px 6px', fontSize: 11, color: S.muted, letterSpacing: 0.5 }}>
+          {filtered.length} / {nb.entries.length}
+        </div>
       </div>
 
       {filtered.length === 0 && (
