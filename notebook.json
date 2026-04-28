@@ -10,7 +10,7 @@
       "priority": "High",
       "status": "In Progress",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "claude",
         "pro",
@@ -28,7 +28,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Physical",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "rusty",
         "wedge"
@@ -112,7 +112,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "4+ hrs",
+      "time": "4 hours",
       "tags": [
         "garage",
         "home",
@@ -129,7 +129,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "4+ hrs",
+      "time": "4 hours",
       "tags": [
         "basement",
         "home",
@@ -146,7 +146,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "office",
         "home",
@@ -164,7 +164,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "closet",
         "home",
@@ -215,7 +215,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "icloud",
         "files",
@@ -248,7 +248,7 @@
       "priority": "Medium",
       "status": "Done",
       "type": "Digital",
-      "time": "< 5 min",
+      "time": "5 min",
       "tags": [
         "apple-id",
         "personal-infra"
@@ -315,7 +315,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "taxes",
         "rental",
@@ -380,7 +380,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "home",
         "calendar",
@@ -397,7 +397,7 @@
       "priority": "Medium",
       "status": "In Progress",
       "type": "Physical",
-      "time": "4+ hrs",
+      "time": "4 hours",
       "tags": [
         "home"
       ],
@@ -412,7 +412,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "4+ hrs",
+      "time": "4 hours",
       "tags": [
         "home",
         "organization"
@@ -428,7 +428,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Physical",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "home",
         "yard"
@@ -627,7 +627,7 @@
       "priority": "Low",
       "status": "Open",
       "type": "Physical",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "stickers"
       ],
@@ -694,7 +694,7 @@
       "priority": "High",
       "status": "Archived",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "dev",
         "vm",
@@ -763,7 +763,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "retirement",
         "finance",
@@ -796,7 +796,7 @@
       "priority": "Medium",
       "status": "Done",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "claude",
         "skills",
@@ -813,7 +813,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "claude",
         "skills",
@@ -830,7 +830,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Work",
-      "time": "2-4 hrs",
+      "time": "2 hrs",
       "tags": [
         "education",
         "microprocessors",
