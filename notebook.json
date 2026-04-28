@@ -10,7 +10,7 @@
       "priority": "High",
       "status": "In Progress",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "claude",
         "pro",
@@ -28,7 +28,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Physical",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "rusty",
         "wedge"
@@ -44,7 +44,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "bitwarden",
         "security",
@@ -61,7 +61,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "apple-id",
         "spouse",
@@ -95,7 +95,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "photos",
         "organization",
@@ -146,7 +146,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "office",
         "home",
@@ -164,7 +164,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Physical",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "closet",
         "home",
@@ -181,7 +181,7 @@
       "priority": "Medium",
       "status": "Done",
       "type": "Physical",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "closet",
         "home",
@@ -215,7 +215,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "icloud",
         "files",
@@ -232,7 +232,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "ios",
         "automation"
@@ -264,7 +264,7 @@
       "priority": "Low",
       "status": "In Progress",
       "type": "Physical",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "personal",
         "clothing"
@@ -315,7 +315,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "taxes",
         "rental",
@@ -332,7 +332,7 @@
       "priority": "Medium",
       "status": "Archived",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "finance",
         "cpwa"
@@ -348,7 +348,7 @@
       "priority": "Low",
       "status": "Done",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "taxes",
         "heloc"
@@ -364,7 +364,7 @@
       "priority": "Low",
       "status": "Done",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "taxes",
         "vehicle"
@@ -380,7 +380,7 @@
       "priority": "Medium",
       "status": "Open",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "home",
         "calendar",
@@ -428,7 +428,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Physical",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "home",
         "yard"
@@ -460,7 +460,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "github",
         "ios",
@@ -477,7 +477,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "security",
         "ai",
@@ -511,7 +511,7 @@
       "priority": "Low",
       "status": "Open",
       "type": "Physical",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "personal",
         "clothing"
@@ -527,7 +527,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "claude",
         "desktop",
@@ -561,7 +561,7 @@
       "priority": "Medium",
       "status": "Done",
       "type": "Physical",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "home",
         "outdoor"
@@ -596,7 +596,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Physical",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "personal"
       ],
@@ -627,7 +627,7 @@
       "priority": "Low",
       "status": "Open",
       "type": "Physical",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "stickers"
       ],
@@ -642,7 +642,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "claude",
         "markdown",
@@ -677,7 +677,7 @@
       "priority": "High",
       "status": "In Progress",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "claude",
         "skills",
@@ -694,7 +694,7 @@
       "priority": "High",
       "status": "Archived",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "dev",
         "vm",
@@ -711,7 +711,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "claude",
         "markdown",
@@ -745,7 +745,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "1 hr",
+      "time": "1 hour",
       "tags": [
         "finance",
         "mortgage",
@@ -763,7 +763,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "retirement",
         "finance",
@@ -796,7 +796,7 @@
       "priority": "Medium",
       "status": "Done",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "claude",
         "skills",
@@ -813,7 +813,7 @@
       "priority": "High",
       "status": "Done",
       "type": "Digital",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "claude",
         "skills",
@@ -830,7 +830,7 @@
       "priority": "High",
       "status": "Open",
       "type": "Work",
-      "time": "2 hrs",
+      "time": "2 hours",
       "tags": [
         "education",
         "microprocessors",
