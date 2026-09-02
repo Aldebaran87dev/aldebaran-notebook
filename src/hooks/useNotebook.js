@@ -20,7 +20,9 @@ async function githubGet(cfg) {
   });
   if (!res.ok) throw new Error(`GitHub GET failed: ${res.status}`);
   const json = await res.json();
-  const content = JSON.parse(atob(json.content.replace(/\n/g, "")));
+  const raw = atob(json.content.replace(/\n/g, ""));
+  const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
+  const content = JSON.parse(new TextDecoder().decode(bytes));
   return { data: content, sha: json.sha };
 }
 

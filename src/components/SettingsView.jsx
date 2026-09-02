@@ -108,7 +108,7 @@ function Field({ label, children }) {
 
 const inp = {
   width: '100%', background: S.surface2, border: `1px solid ${S.border}`,
-  color: S.text, fontFamily: S.font, fontSize: 13,
+  color: S.text, fontFamily: S.font, fontSize: 16,
   padding: '10px 12px', borderRadius: 6, outline: 'none',
 };
 

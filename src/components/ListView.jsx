@@ -95,6 +95,6 @@ export default function ListView({ nb, onSelect }) {
 
 const searchInput = {
   width: '100%', background: S.surface2, border: `1px solid ${S.border}`,
-  color: S.text, fontFamily: S.font, fontSize: 13,
+  color: S.text, fontFamily: S.font, fontSize: 16,
   padding: '8px 12px', borderRadius: 6, outline: 'none',
 };
