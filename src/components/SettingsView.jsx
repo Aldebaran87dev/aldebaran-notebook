@@ -183,6 +183,10 @@ function viewportReport() {
     // where no worker was controlling the page. If this says "none" and the
     // height is 874 across several launches, the worker was the cost.
     ['service worker', navigator.serviceWorker?.controller ? 'CONTROLLING' : 'none'],
+    // The experiment. --vh-extra should equal the shortfall, and root height
+    // should then equal screen.height rather than innerHeight.
+    ['--vh-extra', getComputedStyle(document.documentElement).getPropertyValue('--vh-extra').trim() || 'unset'],
+    ['root vs SCREEN', `${rootH} / ${window.screen.height}`],
   ];
 }
 

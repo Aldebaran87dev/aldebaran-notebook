@@ -36,6 +36,49 @@ export default function App() {
   // Instead, record the geometry AT LANDING so the next report is decisive.
   // Reading it from Settings is useless on its own: navigating there forces a
   // re-layout that would repair the very thing being measured.
+  // THE SHORTFALL IS ARITHMETIC, SO TREAT IT AS ARITHMETIC.
+  //
+  // Every config theory has now been falsified on the device: manifest
+  // standalone, no manifest, manifest fullscreen, and service worker removed
+  // all report innerHeight 812 against screen.height 874. What has never
+  // changed is the geometry itself, and it is peculiar in a specific way:
+  //
+  //   screenY 0        -- the window STARTS at the very top of the screen
+  //   innerHeight 812  -- but reports itself 62 shorter than the screen
+  //   62 = the TOP inset exactly
+  //
+  // That is the known black-translucent quirk: the web view really does cover
+  // the screen, and iOS still subtracts the status bar height from the height
+  // it reports. The pixels are there; the viewport under-reports them. So the
+  // root is told to be taller than the viewport by exactly the amount the
+  // viewport is under-reporting.
+  //
+  // This is NOT the stale-snapshot mistake from earlier. That JS tried to
+  // replace the height. This only computes the DIFFERENCE between two numbers
+  // both visible in the panel, and the fallback is 0px -- which is exactly
+  // today's behaviour. If the difference is wrong, nothing gets worse.
+  useEffect(() => {
+    const el = document.documentElement;
+    const setExtra = () => {
+      const extra = Math.max(0, window.screen.height - window.innerHeight);
+      el.style.setProperty('--vh-extra', `${extra}px`);
+    };
+    setExtra();
+    const ro = new ResizeObserver(setExtra);
+    ro.observe(el);
+    const timers = [0, 100, 400, 1200].map(ms => setTimeout(setExtra, ms));
+    window.addEventListener('resize', setExtra);
+    window.addEventListener('orientationchange', setExtra);
+    window.addEventListener('pageshow', setExtra);
+    return () => {
+      ro.disconnect();
+      timers.forEach(clearTimeout);
+      window.removeEventListener('resize', setExtra);
+      window.removeEventListener('orientationchange', setExtra);
+      window.removeEventListener('pageshow', setExtra);
+    };
+  }, []);
+
   useEffect(() => {
     const t = setTimeout(() => {
       const root = document.querySelector('#root > div');
@@ -183,7 +226,7 @@ export default function App() {
   // declined display:fullscreen because it hides the status bar. Do not chase
   // this with layout changes again.
   return (
-    <div style={{ height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
+    <div style={{ height: 'calc(100dvh + var(--vh-extra, 0px))', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
       {/* Header */}
       <header style={headerStyle}>
         <div style={sideCol('flex-start')}>{headerLeft()}</div>
