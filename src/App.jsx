@@ -13,6 +13,7 @@ export default function App() {
   const rd = useReading();
   const [view, setView]         = useState('list');
   const [selectedId, setSelectedId] = useState(null);
+  const [addOpen, setAddOpen]   = useState(false);   // reading-tab add form
 
   useEffect(() => { nb.load(); rd.load(); }, []);
 
@@ -24,7 +25,20 @@ export default function App() {
   // NOT shrink when the keyboard opens (visualViewport does, which would squash
   // the whole app). Re-measured on every event that can change it.
   useEffect(() => {
-    const setH = () => document.documentElement.style.setProperty('--app-h', `${window.innerHeight}px`);
+    const setH = () => {
+      const el = document.documentElement;
+      el.style.setProperty('--app-h', `${window.innerHeight}px`);
+      // Does the web view actually extend under the status bar and island?
+      // MEASURED on Ted's iPhone 17: innerHeight 812 vs screen.height 874, a
+      // difference of exactly the 62pt top inset -- so iOS had ALREADY inset the
+      // view and the header's env(safe-area-inset-top) padding was counted a
+      // second time, wasting 62pt of screen at the top. env() reports the
+      // DEVICE's inset whether or not the view is drawing under it, so the inset
+      // alone cannot answer this; the heights can. Extends under => pad by the
+      // inset. Already inset => pad by nothing.
+      const under = window.innerHeight >= window.screen.height;
+      el.style.setProperty('--pad-top', under ? 'env(safe-area-inset-top)' : '0px');
+    };
     setH();
     // orientationchange fires before iOS has resized, so re-measure after it too.
     const later = () => { setH(); setTimeout(setH, 300); };
@@ -46,20 +60,33 @@ export default function App() {
   const inEntry = view === 'detail' || view === 'edit' || view === 'add';
 
   function headerLeft() {
-    if (inEntry) {
-      const backV  = view === 'edit' ? 'detail' : 'list';
-      const backId = view === 'edit' ? selectedId : null;
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => nav(backV, backId)} style={backBtn}>←</button>
-          <span style={{ fontSize: 12, letterSpacing: 2, color: S.text }}>
-            {view === 'add' ? 'ADD ENTRY' : view === 'edit' ? 'EDIT' : '◈'}
-          </span>
-        </div>
-      );
-    }
-    const label = view === 'settings' ? 'SETTINGS' : view === 'reading' ? '◈ READING' : '◈ NOTEBOOK';
-    return <span style={{ fontSize: 13, letterSpacing: 2, color: S.text }}>{label}</span>;
+    if (!inEntry) return null;
+    const backV  = view === 'edit' ? 'detail' : 'list';
+    const backId = view === 'edit' ? selectedId : null;
+    return <button onClick={() => nav(backV, backId)} style={backBtn}>←</button>;
+  }
+
+  // The title is centred, and the + that adds to the CURRENT list sits beside
+  // it. That + replaces the old bottom "+ ADD" tab, so the nav is three tabs.
+  function headerCenter() {
+    const title =
+      view === 'add'      ? 'ADD ENTRY' :
+      view === 'edit'     ? 'EDIT'      :
+      view === 'settings' ? 'SETTINGS'  :
+      view === 'reading'  ? 'READING'   : 'TO DO';
+
+    const onPlus =
+      view === 'list'    ? () => nav('add') :
+      view === 'reading' ? () => setAddOpen(v => !v) : null;
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ fontSize: 13, letterSpacing: 2, color: S.text, whiteSpace: 'nowrap' }}>{title}</span>
+        {onPlus && (
+          <button onClick={onPlus} aria-label={`Add to ${title}`} style={plusBtn(view === 'reading' && addOpen)}>+</button>
+        )}
+      </div>
+    );
   }
 
   function headerRight() {
@@ -119,8 +146,9 @@ export default function App() {
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 'var(--app-h, 100dvh)', display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
       {/* Header */}
       <header style={headerStyle}>
-        {headerLeft()}
-        {headerRight()}
+        <div style={sideCol('flex-start')}>{headerLeft()}</div>
+        {headerCenter()}
+        <div style={sideCol('flex-end')}>{headerRight()}</div>
       </header>
 
       {/* Error banner */}
@@ -151,14 +179,18 @@ export default function App() {
           </div>
         )}
 
-        {view === 'reading' && !rd.loading && !rd.books.length && !rd.error && (
+        {view === 'reading' && !rd.loading && !rd.books.length && !rd.error && !addOpen && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, lineHeight: 2 }}>
             <div>No books.</div>
             <div>Add a GitHub PAT in Settings, then reload.</div>
           </div>
         )}
 
-        {view === 'reading' && rd.books.length > 0 && <ReadingView rd={rd} />}
+        {/* addOpen is in the condition on purpose: the + must still open the form
+            when the list is empty, or it is a control that does nothing. */}
+        {view === 'reading' && (rd.books.length > 0 || addOpen) && (
+          <ReadingView rd={rd} addOpen={addOpen} onCloseAdd={() => setAddOpen(false)} />
+        )}
 
         {view === 'list' && nb.entries.length > 0 && (
           <ListView nb={nb} onSelect={id => nav('detail', id)} />
@@ -181,8 +213,7 @@ export default function App() {
 
       {/* Bottom nav */}
       <nav style={navStyle}>
-        <button onClick={() => nav('list')}     style={navBtn(['list','detail','edit'].includes(view))}>LIST</button>
-        <button onClick={() => nav('add')}      style={navBtn(view === 'add')}>+ ADD</button>
+        <button onClick={() => nav('list')}     style={navBtn(['list','detail','edit','add'].includes(view))}>TO DO</button>
         <button onClick={() => nav('reading')}  style={navBtn(view === 'reading')}>READING</button>
         <button onClick={() => nav('settings')} style={navBtn(view === 'settings')}>SETTINGS</button>
       </nav>
@@ -201,11 +232,11 @@ export default function App() {
 const headerStyle = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
   background: S.surface, borderBottom: `1px solid ${S.border}`,
-  paddingTop: 'calc(12px + env(safe-area-inset-top))',
+  paddingTop: 'calc(12px + var(--pad-top, 0px))',
   paddingBottom: 12,
   paddingLeft: 'max(16px, env(safe-area-inset-left))',
   paddingRight: 'max(16px, env(safe-area-inset-right))',
-  minHeight: 'calc(48px + env(safe-area-inset-top))',
+  minHeight: 'calc(48px + var(--pad-top, 0px))',
   flexShrink: 0,
 };
 
@@ -224,6 +255,20 @@ const navBtn = active => ({
   color: active ? S.accent : S.muted,
   fontFamily: S.font, fontSize: 11, letterSpacing: 1.5, cursor: 'pointer',
   padding: '0 12px', minHeight: 44,
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+});
+
+// Equal-width side columns are what actually centre the title: the middle block
+// is auto-width, so it only sits centred if both sides claim the same space.
+// minWidth:0 lets a long right-hand side shrink instead of pushing the title off.
+const sideCol = justify => ({
+  flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: justify,
+});
+
+const plusBtn = on => ({
+  background: 'none', border: 'none', cursor: 'pointer',
+  color: on ? S.accent : S.muted, fontFamily: S.font, fontSize: 22, lineHeight: 1,
+  minWidth: 44, minHeight: 44, padding: 0,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 });
 

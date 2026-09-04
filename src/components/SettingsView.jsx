@@ -137,9 +137,14 @@ function viewportReport() {
     ['screen.availH', window.screen.availHeight],
     ['inset top/bot', `${insetTop} / ${insetBottom}`],
     ['--app-h', getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim() || 'unset'],
+    ['--pad-top', getComputedStyle(document.documentElement).getPropertyValue('--pad-top').trim() || 'unset'],
     ['root height', rootH],
     ['nav bottom', navBottom],
-    ['GAP below nav', window.screen.height - navBottom],
+    // Compare like with like. The old row subtracted a PAGE coordinate from a
+    // SCREEN one, so it reported 62 whenever iOS had inset the web view -- which
+    // read as a gap that was not there. The real gap is inside the viewport.
+    ['GAP below nav', window.innerHeight - navBottom],
+    ['view under status bar', window.innerHeight >= window.screen.height ? 'yes' : 'no (iOS inset it)'],
     ['standalone', window.navigator.standalone === true ? 'yes' : 'no'],
   ];
 }

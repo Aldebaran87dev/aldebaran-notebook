@@ -74,6 +74,7 @@ function reducer(state, action) {
     case "SAVE_OK":     return { ...state, loading: false, sha: action.sha, lastSynced: new Date(), dirty: false };
     case "SAVE_ERR":    return { ...state, loading: false, error: action.error };
     case "TOGGLE_DONE": return { ...state, books: state.books.map(b => b.id === action.id ? { ...b, done: !b.done } : b), dirty: true };
+    case "ADD_BOOK":    return { ...state, books: [...state.books, action.book], dirty: true };
     default:            return state;
   }
 }
@@ -109,5 +110,26 @@ export function useReading() {
 
   const toggleDone = useCallback(id => dispatch({ type: "TOGGLE_DONE", id }), []);
 
-  return { ...state, load, save, toggleDone };
+  // A nonfiction book with no block renders in NO group -- ReadingView lays
+  // nonfiction out as blocks 1/2/3 -- so block is defaulted, never left unset.
+  const addBook = useCallback(fields => {
+    const book = {
+      id: Date.now(),
+      shelf: fields.shelf === "fiction" ? "fiction" : "nonfiction",
+      title: (fields.title || "").trim(),
+      author: (fields.author || "").trim(),
+      pages: fields.pages ? Number(fields.pages) : null,
+      desc: (fields.desc || "").trim(),
+      block: fields.shelf === "fiction" ? null : Number(fields.block) || 1,
+      cluster: (fields.cluster || "").trim() || null,
+      owned: !!fields.owned,
+      reading: false,
+      next: !!fields.next,
+      done: false,
+    };
+    dispatch({ type: "ADD_BOOK", book });
+    return book;
+  }, []);
+
+  return { ...state, load, save, toggleDone, addBook };
 }

@@ -8,7 +8,12 @@ function rank(b) { return b.reading ? 0 : b.next ? 1 : 2; }
 function byRankThenPages(a, b) { return rank(a) - rank(b) || (a.pages || 9999) - (b.pages || 9999); }
 
 function groupByCluster(books) {
-  const loose = books.filter(b => b.owned && !b.cluster).sort(byRankThenPages);
+  // Every book without a cluster lands here. This filter used to also require
+  // `owned`, which meant a book that was neither owned nor clustered matched
+  // NEITHER branch and rendered nowhere -- silently. The seeded data happened to
+  // have no such book, so it never showed; the new add form produces one by
+  // default. Do not narrow this filter again.
+  const loose = books.filter(b => !b.cluster).sort(byRankThenPages);
 
   const map = {};
   const order = [];
@@ -86,7 +91,84 @@ function BookRow({ book, onToggle, index }) {
   );
 }
 
-export default function ReadingView({ rd }) {
+function AddBookForm({ rd, onDone }) {
+  const [f, setF] = useState({ title: '', author: '', pages: '', shelf: 'nonfiction', block: 1, cluster: '', owned: false, next: false });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  const canSave = f.title.trim().length > 0;
+
+  return (
+    <div style={{ margin: '14px 16px 0', padding: 14, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6 }}>
+      <div style={{ fontSize: 10, letterSpacing: 1.5, color: '#666', marginBottom: 10 }}>ADD A BOOK</div>
+
+      <input value={f.title} onChange={e => set('title', e.target.value)} placeholder="Title (required)" style={inp} />
+      <input value={f.author} onChange={e => set('author', e.target.value)} placeholder="Author" style={{ ...inp, marginTop: 8 }} />
+      <input value={f.pages} onChange={e => set('pages', e.target.value.replace(/\D/g, ''))} inputMode="numeric" placeholder="Pages" style={{ ...inp, marginTop: 8 }} />
+
+      <Row label="SHELF">
+        {['nonfiction', 'fiction'].map(v => <Chip key={v} on={f.shelf === v} onClick={() => set('shelf', v)}>{v}</Chip>)}
+      </Row>
+
+      {f.shelf === 'nonfiction' && (
+        <>
+          <Row label="BLOCK">
+            {[1, 2, 3].map(v => <Chip key={v} on={Number(f.block) === v} onClick={() => set('block', v)}>{v} · {BLOCK_LABELS[v]}</Chip>)}
+          </Row>
+          <input value={f.cluster} onChange={e => set('cluster', e.target.value)} placeholder="Cluster (optional)" style={{ ...inp, marginTop: 10 }} />
+        </>
+      )}
+
+      <Row label="FLAGS">
+        <Chip on={f.owned} onClick={() => set('owned', !f.owned)}>owned</Chip>
+        <Chip on={f.next} onClick={() => set('next', !f.next)}>next</Chip>
+      </Row>
+
+      <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+        <button onClick={onDone} style={{ ...btn, flex: 1, color: S.muted, borderColor: S.border }}>CANCEL</button>
+        <button
+          onClick={() => { if (canSave) { rd.addBook(f); onDone(); } }}
+          disabled={!canSave}
+          style={{ ...btn, flex: 2, color: canSave ? S.accent : S.muted, borderColor: canSave ? S.accent : S.border, opacity: canSave ? 1 : 0.5 }}
+        >ADD</button>
+      </div>
+      <div style={{ fontSize: 10, color: S.muted, marginTop: 8, lineHeight: 1.6 }}>
+        Added to the list unsaved. Press SAVE in the header to write it to GitHub.
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, children }) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ fontSize: 9, letterSpacing: 1.5, color: '#666', marginBottom: 6 }}>{label}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{children}</div>
+    </div>
+  );
+}
+
+function Chip({ on, onClick, children }) {
+  return (
+    <button onClick={onClick} style={{
+      background: on ? S.accent + '1a' : 'none', border: `1px solid ${on ? S.accent : S.border}`,
+      color: on ? S.accent : S.muted, fontFamily: S.font, fontSize: 11,
+      padding: '8px 12px', borderRadius: 4, cursor: 'pointer', minHeight: 36,
+    }}>{children}</button>
+  );
+}
+
+const inp = {
+  width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+  background: S.bg, border: `1px solid ${S.border}`, borderRadius: 6,
+  color: S.text, fontFamily: S.font, fontSize: 16, outline: 'none',
+};
+
+const btn = {
+  padding: 12, background: 'none', border: '1px solid',
+  fontFamily: S.font, fontSize: 11, letterSpacing: 1.5,
+  borderRadius: 6, cursor: 'pointer', minHeight: 44,
+};
+
+export default function ReadingView({ rd, addOpen, onCloseAdd }) {
   const [shelf, setShelf] = useState('nonfiction');
   const [query, setQuery] = useState('');
 
@@ -108,6 +190,8 @@ export default function ReadingView({ rd }) {
 
   return (
     <div>
+      {addOpen && <AddBookForm rd={rd} onDone={onCloseAdd} />}
+
       {/* Schedule strip */}
       {rd.schedule.length > 0 && (
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '14px 16px 0' }}>
