@@ -286,9 +286,9 @@ export default function App() {
 
       {/* Bottom nav */}
       <nav style={navStyle}>
-        <button onClick={() => nav('list')}     style={navBtn(['list','detail','edit','add'].includes(view))}>TO DO</button>
-        <button onClick={() => nav('reading')}  style={navBtn(view === 'reading')}>READING</button>
-        <button onClick={() => nav('settings')} style={navBtn(view === 'settings')}>SETTINGS</button>
+        <button onClick={() => nav('list')}     aria-label="To do"    title="To do"    style={navBtn(['list','detail','edit','add'].includes(view))}><CheckboxIcon /></button>
+        <button onClick={() => nav('reading')}  aria-label="Reading"  title="Reading"  style={navBtn(view === 'reading')}><GlassesIcon /></button>
+        <button onClick={() => nav('settings')} aria-label="Settings" title="Settings" style={navBtn(view === 'settings')}><GearIcon /></button>
       </nav>
     </div>
   );
@@ -337,13 +337,68 @@ const navStyle = {
   flexShrink: 0,
 };
 
+// `color` is the whole point: the icons paint with currentColor, so the active
+// tab still turns blue with no per-icon colour anywhere. The font properties
+// that used to size the label are gone -- there is no text left to style.
 const navBtn = active => ({
   background: 'none', border: 'none',
   color: active ? S.accent : S.muted,
-  fontFamily: S.font, fontSize: 14, letterSpacing: 1.5, cursor: 'pointer',
+  cursor: 'pointer',
   padding: '0 12px', minHeight: 44,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 });
+
+// ── Nav icons ────────────────────────────────────────────────────────────────
+// Drawn inline rather than pulled from an icon package or typed as emoji. An
+// emoji carries its own fixed colours, so it could not follow the active tab;
+// a package would be a dependency for three shapes. 24px sits inside the 44pt
+// touch target, so the nav keeps its height.
+const iconProps = {
+  width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
+  stroke: 'currentColor', strokeWidth: 1.9,
+  strokeLinecap: 'round', strokeLinejoin: 'round',
+  'aria-hidden': true,
+};
+
+const CheckboxIcon = () => (
+  <svg {...iconProps}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="3.5" />
+    <path d="M7.8 12.3l2.9 2.9 5.5-6" />
+  </svg>
+);
+
+// Two lenses, a bridge between them, and a temple rising from each outer edge.
+// Each temple starts exactly on its lens's outermost point, so the joint reads
+// as one piece.
+const GlassesIcon = () => (
+  <svg {...iconProps}>
+    <circle cx="6.8" cy="14.6" r="4.4" />
+    <circle cx="17.2" cy="14.6" r="4.4" />
+    <path d="M11.2 14.2c.5-1 1.6-1 2.1 0" />
+    <path d="M2.4 14.6V10.4a3.4 3.4 0 0 1 3.4-3.4" />
+    <path d="M21.6 14.6V10.4a3.4 3.4 0 0 0-3.4-3.4" />
+  </svg>
+);
+
+// A ring, a hub, and eight teeth. The teeth are generated from their angles
+// rather than written out, so the spacing is exact and one cannot drift.
+const GearIcon = () => (
+  <svg {...iconProps}>
+    <circle cx="12" cy="12" r="3.1" />
+    <circle cx="12" cy="12" r="6.5" />
+    {[0, 45, 90, 135, 180, 225, 270, 315].map(deg => {
+      const a = (deg * Math.PI) / 180;
+      return (
+        <line
+          key={deg}
+          x1={12 + 6.3 * Math.cos(a)} y1={12 + 6.3 * Math.sin(a)}
+          x2={12 + 9.2 * Math.cos(a)} y2={12 + 9.2 * Math.sin(a)}
+          strokeWidth="2.4"
+        />
+      );
+    })}
+  </svg>
+);
 
 // Equal-width side columns are what actually centre the title: the middle block
 // is auto-width, so it only sits centred if both sides claim the same space.
