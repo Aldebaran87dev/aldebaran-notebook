@@ -2,7 +2,7 @@
   "name": "aldebaran-notebook",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://aldebaran87.github.io/aldebaran-notebook",
+  "homepage": "https://aldebaran87dev.github.io/aldebaran-notebook",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
