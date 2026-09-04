@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNotebook } from './hooks/useNotebook';
+import { useReading } from './hooks/useReading';
 import ListView from './components/ListView';
 import DetailView from './components/DetailView';
 import EditView from './components/EditView';
 import SettingsView from './components/SettingsView';
+import ReadingView from './components/ReadingView';
 import { S } from './styles';
 
 export default function App() {
   const nb = useNotebook();
+  const rd = useReading();
   const [view, setView]         = useState('list');
   const [selectedId, setSelectedId] = useState(null);
 
-  useEffect(() => { nb.load(); }, []);
+  useEffect(() => { nb.load(); rd.load(); }, []);
 
   function nav(v, id = null) { setView(v); setSelectedId(id); }
 
@@ -33,11 +36,27 @@ export default function App() {
         </div>
       );
     }
-    const label = view === 'settings' ? 'SETTINGS' : '◈ NOTEBOOK';
+    const label = view === 'settings' ? 'SETTINGS' : view === 'reading' ? '◈ READING' : '◈ NOTEBOOK';
     return <span style={{ fontSize: 13, letterSpacing: 2, color: S.text }}>{label}</span>;
   }
 
   function headerRight() {
+    if (view === 'reading') {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 11, color: S.muted }}>{rd.books.length} books</span>
+          {rd.dirty && (
+            <button
+              onClick={() => rd.save(rd.books, rd.schedule, rd.sha)}
+              disabled={rd.loading}
+              style={{ ...ghostBtn, color: S.success, borderColor: S.success + '88' }}
+            >
+              {rd.loading ? '···' : 'SAVE'}
+            </button>
+          )}
+        </div>
+      );
+    }
     if (view === 'list') {
       return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -78,26 +97,41 @@ export default function App() {
       </header>
 
       {/* Error banner */}
-      {nb.error && (
+      {(view === 'reading' ? rd.error : nb.error) && (
         <div style={{ background: '#2a1515', color: S.danger, padding: '8px 16px', fontSize: 12, borderBottom: `1px solid ${S.danger}33` }}>
-          {nb.error}
+          {view === 'reading' ? rd.error : nb.error}
         </div>
       )}
 
       {/* Content */}
       <main style={{ flex: 1, overflowY: 'auto', paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}>
-        {nb.loading && !nb.entries.length && (
+        {view !== 'reading' && nb.loading && !nb.entries.length && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, letterSpacing: 2 }}>
             LOADING···
           </div>
         )}
 
-        {!nb.loading && !nb.entries.length && !nb.error && (
+        {view !== 'reading' && !nb.loading && !nb.entries.length && !nb.error && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, lineHeight: 2 }}>
             <div>No entries.</div>
             <div>Add a GitHub PAT in Settings, then reload.</div>
           </div>
         )}
+
+        {view === 'reading' && rd.loading && !rd.books.length && (
+          <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, letterSpacing: 2 }}>
+            LOADING···
+          </div>
+        )}
+
+        {view === 'reading' && !rd.loading && !rd.books.length && !rd.error && (
+          <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, lineHeight: 2 }}>
+            <div>No books.</div>
+            <div>Add a GitHub PAT in Settings, then reload.</div>
+          </div>
+        )}
+
+        {view === 'reading' && rd.books.length > 0 && <ReadingView rd={rd} />}
 
         {view === 'list' && nb.entries.length > 0 && (
           <ListView nb={nb} onSelect={id => nav('detail', id)} />
@@ -122,6 +156,7 @@ export default function App() {
       <nav style={navStyle}>
         <button onClick={() => nav('list')}     style={navBtn(['list','detail','edit'].includes(view))}>LIST</button>
         <button onClick={() => nav('add')}      style={navBtn(view === 'add')}>+ ADD</button>
+        <button onClick={() => nav('reading')}  style={navBtn(view === 'reading')}>READING</button>
         <button onClick={() => nav('settings')} style={navBtn(view === 'settings')}>SETTINGS</button>
       </nav>
     </div>

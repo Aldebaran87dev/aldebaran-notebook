@@ -18,3 +18,17 @@ export const GITHUB_DEFAULTS = {
   repo:  "aldebaran-docs",
   path:  "notebook.json",
 };
+
+// ── Reading queue ─────────────────────────────────────────────────────────────
+// Same private repo as the notebook, different file. Owner/repo come from the
+// notebook's saved settings; only the path differs.
+export const READING_DEFAULTS = {
+  owner: "Aldebaran87dev",
+  repo:  "aldebaran-docs",
+  path:  "reading.json",
+};
+
+export const SHELVES      = ["nonfiction", "fiction"];
+export const BLOCK_LABELS = { 1: "Quick Wins", 2: "Medium Depth", 3: "Heavy" };
+export const BLOCK_CLR    = { 1: "#6dde9e", 2: "#e8c547", 3: "#ff6b6b" };
+export const BADGE_CLR    = { reading: "#6dde9e", next: "#5bb8f5", owned: "#c8a96a" };
