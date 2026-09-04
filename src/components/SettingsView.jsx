@@ -170,6 +170,11 @@ function viewportReport() {
     ['view under status bar', window.screenY === 0 ? 'yes (starts at screen top)' : 'no, offset ' + window.screenY],
     ['reaches screen bottom', (window.screenY + window.innerHeight) >= window.screen.height ? 'yes' : 'no'],
     ['standalone', window.navigator.standalone === true ? 'yes' : 'no'],
+    // Which config path iOS is on. A manifest link means iOS follows the
+    // manifest's display and ignores the status-bar meta, which is what insets
+    // the window by 62. No link means the meta path, which gives the full screen.
+    ['manifest linked', document.querySelector('link[rel=manifest]') ? 'YES (insets the window)' : 'no (meta path)'],
+    ['status bar meta', document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content || 'absent'],
   ];
 }
 
