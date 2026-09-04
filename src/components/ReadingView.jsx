@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BLOCK_LABELS, BLOCK_CLR, BADGE_CLR } from '../constants';
-import { S } from '../styles';
+import { S, ENTRY } from '../styles';
 
 // Owned-and-unclustered books float to the top of a block; inside a cluster,
 // owned come first. Within either, reading > next > the rest, then by length.
@@ -42,23 +42,21 @@ function Badge({ kind }) {
   );
 }
 
-// `inDoneTab` says the row is being listed UNDER the Done tab rather than
-// sitting ticked inside its own shelf. There, dimming and striking every line
-// would fade the whole tab out, so the row renders at full strength; the tick
-// stays, and tapping it still returns the book to its shelf.
-function BookRow({ book, onToggle, index, inDoneTab = false }) {
+// Every row renders at full strength. A ticked book is never listed inside its
+// own shelf any more -- it moves to the DONE tab -- so there is no dimmed state
+// left to draw. `done` still drives the tick and hides the reading/next/owned
+// badges, which say nothing about a finished book.
+function BookRow({ book, onToggle, index }) {
   const done = !!book.done;
-  const dim  = done && !inDoneTab;
   return (
     <div
       onClick={() => onToggle(book.id)}
       style={{
         display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 0',
         borderBottom: `1px solid ${S.border}`, cursor: 'pointer',
-        opacity: dim ? 0.4 : 1, transition: 'opacity 0.2s',
       }}
     >
-      <div style={{ fontSize: 11, color: S.muted, minWidth: 22, paddingTop: 2 }}>
+      <div style={{ fontSize: 11, color: ENTRY.meta, minWidth: 22, paddingTop: 2 }}>
         {String(index).padStart(2, '0')}
       </div>
       <div style={{
@@ -75,19 +73,16 @@ function BookRow({ book, onToggle, index, inDoneTab = false }) {
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <span style={{
-            fontSize: 14, lineHeight: 1.3, color: dim ? S.muted : S.text,
-            textDecoration: dim ? 'line-through' : 'none',
-          }}>{book.title}</span>
+          <span style={{ fontSize: 14, lineHeight: 1.3, color: ENTRY.title }}>{book.title}</span>
           {!done && book.reading && <Badge kind="reading" />}
           {!done && book.next && !book.reading && <Badge kind="next" />}
           {!done && book.owned && !book.reading && <Badge kind="owned" />}
         </div>
-        <div style={{ fontSize: 11, color: S.muted, marginTop: 3 }}>
+        <div style={{ fontSize: 11, color: ENTRY.body, marginTop: 3 }}>
           {book.author}{book.pages ? ` · ${book.pages}pp` : ''}
         </div>
         {book.desc && (
-          <div style={{ fontSize: 11, color: '#6e6e6e', marginTop: 4, lineHeight: 1.6 }}>
+          <div style={{ fontSize: 11, color: ENTRY.meta, marginTop: 4, lineHeight: 1.6 }}>
             {book.desc}
           </div>
         )}
@@ -307,13 +302,7 @@ export default function ReadingView({ rd, addOpen, onCloseAdd }) {
               );
             })
           : shown.map((book, i) => (
-              <BookRow
-                key={book.id}
-                book={book}
-                onToggle={rd.toggleDone}
-                index={i + 1}
-                inDoneTab={tab === 'done'}
-              />
+              <BookRow key={book.id} book={book} onToggle={rd.toggleDone} index={i + 1} />
             ))}
       </div>
     </div>
