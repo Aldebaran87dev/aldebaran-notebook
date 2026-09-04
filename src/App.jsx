@@ -135,65 +135,50 @@ export default function App() {
   const inEntry = view === 'detail' || view === 'edit' || view === 'add';
 
   function headerLeft() {
-    if (!inEntry) return null;
-    const backV  = view === 'edit' ? 'detail' : 'list';
-    const backId = view === 'edit' ? selectedId : null;
-    return <button onClick={() => nav(backV, backId)} style={backBtn}>←</button>;
+    if (inEntry) {
+      const backV  = view === 'edit' ? 'detail' : 'list';
+      const backId = view === 'edit' ? selectedId : null;
+      return <button onClick={() => nav(backV, backId)} style={backBtn}>←</button>;
+    }
+    if (view === 'list')    return <span style={countText}>{nb.entries.length} entries</span>;
+    if (view === 'reading') return <span style={countText}>{rd.books.length} books</span>;
+    return null;
   }
 
-  // The title is centred, and the + that adds to the CURRENT list sits beside
-  // it. That + replaces the old bottom "+ ADD" tab, so the nav is three tabs.
+  // The header is three columns: the item count on the left, the title centred,
+  // and the + that adds to the CURRENT list on the right. That + replaces the
+  // old bottom "+ ADD" tab, so the nav is three tabs.
+  const viewTitle =
+    view === 'add'      ? 'ADD ENTRY' :
+    view === 'edit'     ? 'EDIT'      :
+    view === 'settings' ? 'SETTINGS'  :
+    view === 'reading'  ? 'READING'   : 'TO DO';
+
   function headerCenter() {
-    const title =
-      view === 'add'      ? 'ADD ENTRY' :
-      view === 'edit'     ? 'EDIT'      :
-      view === 'settings' ? 'SETTINGS'  :
-      view === 'reading'  ? 'READING'   : 'TO DO';
-
-    const onPlus =
-      view === 'list'    ? () => nav('add') :
-      view === 'reading' ? () => setAddOpen(v => !v) : null;
-
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <span style={{ fontSize: 13, letterSpacing: 2, color: S.text, whiteSpace: 'nowrap' }}>{title}</span>
-        {onPlus && (
-          <button onClick={onPlus} aria-label={`Add to ${title}`} style={plusBtn(view === 'reading' && addOpen)}>+</button>
-        )}
-      </div>
-    );
+    return <span style={titleText}>{viewTitle}</span>;
   }
 
   function headerRight() {
-    if (view === 'reading') {
+    if (view === 'list' || view === 'reading') {
+      const reading = view === 'reading';
+      const dirty   = reading ? rd.dirty   : nb.dirty;
+      const loading = reading ? rd.loading : nb.loading;
+      const onSave  = reading
+        ? () => rd.save(rd.books, rd.schedule, rd.sha)
+        : () => nb.save(nb.entries, nb.sha);
+      const onPlus  = reading ? () => setAddOpen(v => !v) : () => nav('add');
       return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 11, color: S.muted }}>{rd.books.length} books</span>
-          {rd.dirty && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {dirty && (
             <button
-              onClick={() => rd.save(rd.books, rd.schedule, rd.sha)}
-              disabled={rd.loading}
+              onClick={onSave}
+              disabled={loading}
               style={{ ...ghostBtn, color: S.success, borderColor: S.success + '88' }}
             >
-              {rd.loading ? '···' : 'SAVE'}
+              {loading ? '···' : 'SAVE'}
             </button>
           )}
-        </div>
-      );
-    }
-    if (view === 'list') {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 11, color: S.muted }}>{nb.entries.length} entries</span>
-          {nb.dirty && (
-            <button
-              onClick={() => nb.save(nb.entries, nb.sha)}
-              disabled={nb.loading}
-              style={{ ...ghostBtn, color: S.success, borderColor: S.success + '88' }}
-            >
-              {nb.loading ? '···' : 'SAVE'}
-            </button>
-          )}
+          <button onClick={onPlus} aria-label={`Add to ${viewTitle}`} style={plusBtn(reading && addOpen)}>+</button>
         </div>
       );
     }
@@ -355,7 +340,7 @@ const navStyle = {
 const navBtn = active => ({
   background: 'none', border: 'none',
   color: active ? S.accent : S.muted,
-  fontFamily: S.font, fontSize: 11, letterSpacing: 1.5, cursor: 'pointer',
+  fontFamily: S.font, fontSize: 14, letterSpacing: 1.5, cursor: 'pointer',
   padding: '0 12px', minHeight: 44,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 });
@@ -367,24 +352,37 @@ const sideCol = justify => ({
   flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: justify,
 });
 
+// The header's three text roles. Sizes here are free: every header control has
+// a 44pt minimum touch target, and that target -- not the type -- sets the
+// header's height, so type can grow without the bar growing.
+const titleText = { fontSize: 17, letterSpacing: 2, color: S.text, whiteSpace: 'nowrap' };
+const countText = { fontSize: 14, color: S.muted, whiteSpace: 'nowrap' };
+
 const plusBtn = on => ({
   background: 'none', border: 'none', cursor: 'pointer',
-  color: on ? S.accent : S.muted, fontFamily: S.font, fontSize: 22, lineHeight: 1,
+  color: on ? S.accent : S.muted, fontFamily: S.font, fontSize: 28, lineHeight: 1,
   minWidth: 44, minHeight: 44, padding: 0,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 });
 
 // 44pt is Apple's minimum touch target. These were 26x22 and 24 tall.
+// The COLOUR is read off titleText so the arrow always matches the header
+// title. The SIZE is deliberately its own number -- at the title's 17px the
+// arrow glyph reads far smaller than the capitals beside it, because the glyph
+// occupies a fraction of its em box that a capital letter does not.
+// lineHeight 1 keeps the 35px glyph's line box from pushing the button past
+// its 44pt floor, which is what sets the header's height.
 const backBtn = {
-  background: 'none', border: 'none', color: S.muted,
-  fontFamily: S.font, fontSize: 18, cursor: 'pointer', padding: 0,
+  background: 'none', border: 'none', color: titleText.color,
+  fontFamily: S.font, fontSize: 35, fontWeight: 700, lineHeight: 1,
+  cursor: 'pointer', padding: 0,
   minWidth: 44, minHeight: 44,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 };
 
 const ghostBtn = {
   background: 'none', border: '1px solid',
-  fontFamily: S.font, fontSize: 10, letterSpacing: 1, cursor: 'pointer',
+  fontFamily: S.font, fontSize: 12, letterSpacing: 1, cursor: 'pointer',
   padding: '0 14px', borderRadius: 4, minHeight: 44,
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 };

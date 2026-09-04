@@ -1,6 +1,13 @@
 import { CAT_CLR, ST_CLR, PRI_CLR, TYP_CLR, TIM_CLR } from '../constants';
 import { S } from '../styles';
 
+// Card-local text colours, brighter than the shared S.muted. They stay here
+// rather than in styles.js because S.muted also paints the header, the nav and
+// the empty states, and only the entry text was meant to change.
+const CARD_TITLE = '#ffffff';
+const CARD_BODY  = '#d0d0d0';
+const CARD_DATE  = '#a8a8a8';
+
 export default function EntryCard({ entry, onSelect }) {
   return (
     <div onClick={() => onSelect(entry.id)} style={card}>
@@ -14,14 +21,14 @@ export default function EntryCard({ entry, onSelect }) {
       </div>
 
       {/* Title */}
-      <div style={{ fontSize: 14, fontWeight: 500, color: S.text, marginBottom: 4, lineHeight: 1.4 }}>
+      <div style={{ fontSize: 14, fontWeight: 500, color: CARD_TITLE, marginBottom: 4, lineHeight: 1.4 }}>
         {entry.title}
       </div>
 
       {/* Body preview */}
       {entry.body && (
         <div style={{
-          fontSize: 12, color: S.muted, marginBottom: 6, lineHeight: 1.5,
+          fontSize: 12, color: CARD_BODY, marginBottom: 6, lineHeight: 1.5,
           overflow: 'hidden', display: '-webkit-box',
           WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
         }}>
@@ -33,7 +40,7 @@ export default function EntryCard({ entry, onSelect }) {
       {entry.tags?.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 5 }}>
           {entry.tags.map(t => (
-            <span key={t} style={{ fontSize: 10, color: S.muted, background: S.surface2, padding: '2px 6px', borderRadius: 3 }}>
+            <span key={t} style={{ fontSize: 10, color: CARD_BODY, background: S.surface2, padding: '2px 6px', borderRadius: 3 }}>
               #{t}
             </span>
           ))}
@@ -41,7 +48,7 @@ export default function EntryCard({ entry, onSelect }) {
       )}
 
       {/* Date */}
-      <div style={{ fontSize: 10, color: '#555' }}>
+      <div style={{ fontSize: 10, color: CARD_DATE }}>
         {new Date(entry.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
       </div>
     </div>
