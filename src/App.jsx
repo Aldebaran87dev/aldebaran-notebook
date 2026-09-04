@@ -16,6 +16,28 @@ export default function App() {
 
   useEffect(() => { nb.load(); rd.load(); }, []);
 
+  // Lock the shell to a height measured in JS rather than trusting a CSS
+  // viewport unit. On an iOS home-screen app, 100dvh -- and position:fixed with
+  // inset:0 -- can still resolve against a viewport that excludes the bottom
+  // safe area on first paint, which leaves a strip of background below the nav.
+  // window.innerHeight is the LAYOUT viewport, so it is the full screen and does
+  // NOT shrink when the keyboard opens (visualViewport does, which would squash
+  // the whole app). Re-measured on every event that can change it.
+  useEffect(() => {
+    const setH = () => document.documentElement.style.setProperty('--app-h', `${window.innerHeight}px`);
+    setH();
+    // orientationchange fires before iOS has resized, so re-measure after it too.
+    const later = () => { setH(); setTimeout(setH, 300); };
+    window.addEventListener('resize', setH);
+    window.addEventListener('orientationchange', later);
+    window.addEventListener('pageshow', setH);
+    return () => {
+      window.removeEventListener('resize', setH);
+      window.removeEventListener('orientationchange', later);
+      window.removeEventListener('pageshow', setH);
+    };
+  }, []);
+
   function nav(v, id = null) { setView(v); setSelectedId(id); }
 
   const selected = selectedId ? nb.entries.find(e => e.id === selectedId) : null;
@@ -88,15 +110,13 @@ export default function App() {
     return null;
   }
 
-  // The root is position:fixed + inset:0 rather than height:100dvh. In a
-  // standalone iOS PWA, 100dvh can resolve against a stale viewport on first
-  // paint, so the app came up short of the bottom of the screen until something
-  // forced a re-layout. A fixed root is measured against the visual viewport
-  // itself and re-lays out on every change, so there is no first-paint gap.
-  // The nav is a plain flex child of that root, so it needs no fixed
-  // positioning and main needs no padding to clear it.
+  // Height comes from --app-h, set in JS above; 100dvh is only the fallback for
+  // the first frame before that effect runs. inset:0 alone was not enough on the
+  // phone -- the gap came back -- so the measured value is the source of truth.
+  // The nav is a plain flex child of this root, so it needs no fixed positioning
+  // and main needs no padding to clear it.
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 'var(--app-h, 100dvh)', display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
       {/* Header */}
       <header style={headerStyle}>
         {headerLeft()}

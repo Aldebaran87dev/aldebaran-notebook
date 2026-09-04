@@ -82,6 +82,9 @@ export default function SettingsView({ nb }) {
       <div style={{ marginTop: 28, fontSize: 11, color: S.muted, lineHeight: 2 }}>
         <div>Last sync: {nb.lastSynced ? nb.lastSynced.toLocaleString() : 'Never'}</div>
         <div>Entries: {nb.entries.length}</div>
+        {/* Which build is actually running. Settles "are you on the new version?"
+            without guessing — the bundle name is content-hashed per deploy. */}
+        <div>Build: {buildId()}</div>
       </div>
 
       <div style={{ marginTop: 20 }}>
@@ -95,6 +98,15 @@ export default function SettingsView({ nb }) {
       </div>
     </div>
   );
+}
+
+// The running bundle's content hash, read off the loaded script tag. Needs no
+// build config: vite already names the file per build.
+function buildId() {
+  const s = [...document.querySelectorAll('script[src]')]
+    .map(el => el.src.match(/index-([A-Za-z0-9_-]+)\.js/))
+    .find(Boolean);
+  return s ? s[1] : 'dev';
 }
 
 function Field({ label, children }) {
