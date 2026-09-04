@@ -4,7 +4,7 @@
 // deploy's. It never actually ran in production (see the registration note in
 // main.jsx: it was requested from the domain root and 404'd), so nothing was
 // cached by it, but do not restore that strategy.
-const CACHE = 'notebook-v3';
+const CACHE = 'notebook-v4';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
