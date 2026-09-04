@@ -42,15 +42,20 @@ function Badge({ kind }) {
   );
 }
 
-function BookRow({ book, onToggle, index }) {
+// `inDoneTab` says the row is being listed UNDER the Done tab rather than
+// sitting ticked inside its own shelf. There, dimming and striking every line
+// would fade the whole tab out, so the row renders at full strength; the tick
+// stays, and tapping it still returns the book to its shelf.
+function BookRow({ book, onToggle, index, inDoneTab = false }) {
   const done = !!book.done;
+  const dim  = done && !inDoneTab;
   return (
     <div
       onClick={() => onToggle(book.id)}
       style={{
         display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 0',
         borderBottom: `1px solid ${S.border}`, cursor: 'pointer',
-        opacity: done ? 0.4 : 1, transition: 'opacity 0.2s',
+        opacity: dim ? 0.4 : 1, transition: 'opacity 0.2s',
       }}
     >
       <div style={{ fontSize: 11, color: S.muted, minWidth: 22, paddingTop: 2 }}>
@@ -71,8 +76,8 @@ function BookRow({ book, onToggle, index }) {
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span style={{
-            fontSize: 14, lineHeight: 1.3, color: done ? S.muted : S.text,
-            textDecoration: done ? 'line-through' : 'none',
+            fontSize: 14, lineHeight: 1.3, color: dim ? S.muted : S.text,
+            textDecoration: dim ? 'line-through' : 'none',
           }}>{book.title}</span>
           {!done && book.reading && <Badge kind="reading" />}
           {!done && book.next && !book.reading && <Badge kind="next" />}
@@ -169,7 +174,7 @@ const btn = {
 };
 
 export default function ReadingView({ rd, addOpen, onCloseAdd }) {
-  const [shelf, setShelf] = useState('nonfiction');
+  const [tab, setTab]     = useState('nonfiction');
   const [query, setQuery] = useState('');
 
   const q = query.trim().toLowerCase();
@@ -181,10 +186,13 @@ export default function ReadingView({ rd, addOpen, onCloseAdd }) {
         (b.cluster || '').toLowerCase().includes(q))
     : books;
 
-  const shelfBooks = onShelf(shelf);
-  const done  = shelfBooks.filter(b => b.done).length;
-  const total = shelfBooks.length;
-  const shown = match(shelfBooks);
+  // A ticked book leaves its shelf and appears under DONE. There is no second
+  // list and no move operation: both views read the same `done` flag, so
+  // un-ticking a book in the Done tab returns it to its shelf on the next
+  // render. Nothing can be stranded in one list and missing from the other.
+  const doneBooks = rd.books.filter(b => b.done);
+  const listed    = tab === 'done' ? doneBooks : onShelf(tab).filter(b => !b.done);
+  const shown     = match(listed);
 
   let index = 0;
 
@@ -192,75 +200,81 @@ export default function ReadingView({ rd, addOpen, onCloseAdd }) {
     <div>
       {addOpen && <AddBookForm rd={rd} onDone={onCloseAdd} />}
 
-      {/* Schedule strip */}
-      {rd.schedule.length > 0 && (
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '14px 16px 0' }}>
-          {rd.schedule.map(s => (
-            <div key={s.day} style={{
-              display: 'inline-flex', gap: 6, flexShrink: 0, alignItems: 'center',
-              background: S.surface2, border: `1px solid ${S.border}`,
-              borderRadius: 3, padding: '4px 10px',
-            }}>
-              <span style={{ fontSize: 11, color: S.accent }}>{s.day}</span>
-              <span style={{ fontSize: 11, color: S.muted }}>{s.time}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Shelf tabs */}
-      <div style={{ display: 'flex', padding: '14px 16px 0' }}>
-        {['nonfiction', 'fiction'].map(name => {
-          const books = onShelf(name);
-          return (
-            <button
-              key={name}
-              onClick={() => setShelf(name)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: S.font, fontSize: 11, letterSpacing: 1.5,
-                textTransform: 'uppercase', padding: '6px 0 10px', marginRight: 24,
-                color: shelf === name ? S.accent : S.muted,
-                borderBottom: `2px solid ${shelf === name ? S.accent : 'transparent'}`,
-              }}
-            >
-              {name} · {books.filter(b => b.done).length}/{books.length}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Progress */}
-      <div style={{ height: 3, background: S.border }}>
-        <div style={{
-          height: 3, background: S.accent, transition: 'width 0.4s ease',
-          width: total ? `${(done / total) * 100}%` : '0%',
-        }} />
-      </div>
-
-      {/* Search */}
-      <div style={{ padding: '12px 16px 0' }}>
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Search title, author, or cluster···"
-          style={{
-            width: '100%', boxSizing: 'border-box', padding: '10px 12px',
-            background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6,
-            color: S.text, fontFamily: S.font, fontSize: 16, outline: 'none',
-          }}
-        />
-      </div>
-
-      <div style={{ padding: '16px 16px 0' }}>
-        {shown.length === 0 && (
-          <div style={{ padding: 32, textAlign: 'center', color: S.muted, fontSize: 12 }}>
-            No matches.
+      {/* Everything down to the search box is frozen while the books scroll
+          under it. `main` in App.jsx is the scroll container, so sticky
+          resolves against that. The background is opaque on purpose -- without
+          it the rows would show through. */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 5, background: S.bg, paddingBottom: 10 }}>
+        {/* Schedule strip */}
+        {rd.schedule.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '14px 16px 0' }}>
+            {rd.schedule.map(s => (
+              <div key={s.day} style={{
+                display: 'inline-flex', gap: 6, flexShrink: 0, alignItems: 'center',
+                background: S.surface2, border: `1px solid ${S.border}`,
+                borderRadius: 3, padding: '4px 10px',
+              }}>
+                <span style={{ fontSize: 11, color: S.accent }}>{s.day}</span>
+                <span style={{ fontSize: 11, color: S.muted }}>{s.time}</span>
+              </div>
+            ))}
           </div>
         )}
 
-        {shelf === 'nonfiction'
+        {/* Tabs. The active one is marked by its colour alone -- no underline
+            and no progress bar beneath the row. The shelf counts still carry
+            the progress number that the bar used to draw. */}
+        <div style={{ display: 'flex', padding: '14px 16px 0' }}>
+          {['nonfiction', 'fiction', 'done'].map(name => {
+            const books = name === 'done' ? doneBooks : onShelf(name);
+            const label = name === 'done'
+              ? `done · ${books.length}`
+              : `${name} · ${books.filter(b => b.done).length}/${books.length}`;
+            return (
+              <button
+                key={name}
+                onClick={() => setTab(name)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: S.font, fontSize: 11, letterSpacing: 1,
+                  // A third tab pushed the row past the screen width, and a
+                  // wrapped label broke each tab across two lines. nowrap keeps
+                  // a tab whole; the tighter spacing is what buys the room.
+                  whiteSpace: 'nowrap',
+                  textTransform: 'uppercase', padding: '6px 0 10px', marginRight: 18,
+                  color: tab === name ? S.accent : S.muted,
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Search */}
+        <div style={{ padding: '0 16px' }}>
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search title, author, or cluster···"
+            style={{
+              width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+              background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6,
+              color: S.text, fontFamily: S.font, fontSize: 16, outline: 'none',
+            }}
+          />
+        </div>
+      </div>
+
+      <div style={{ padding: '6px 16px 0' }}>
+        {shown.length === 0 && (
+          <div style={{ padding: 32, textAlign: 'center', color: S.muted, fontSize: 12 }}>
+            {tab === 'done' && !q ? 'Nothing finished yet.' : 'No matches.'}
+          </div>
+        )}
+
+        {tab === 'nonfiction'
           ? [1, 2, 3].map(block => {
               const groups = groupByCluster(shown.filter(b => b.block === block));
               if (!groups.length) return null;
@@ -293,7 +307,13 @@ export default function ReadingView({ rd, addOpen, onCloseAdd }) {
               );
             })
           : shown.map((book, i) => (
-              <BookRow key={book.id} book={book} onToggle={rd.toggleDone} index={i + 1} />
+              <BookRow
+                key={book.id}
+                book={book}
+                onToggle={rd.toggleDone}
+                index={i + 1}
+                inDoneTab={tab === 'done'}
+              />
             ))}
       </div>
     </div>
