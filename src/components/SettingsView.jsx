@@ -179,6 +179,10 @@ function viewportReport() {
     // that is a different problem from the manifest being wrong.
     ['manifest display', window.__manifestDisplay || 'not read yet'],
     ['launches seen', window.__launchCount ?? 1],
+    // The live experiment. The one 874 reading came from the single launch
+    // where no worker was controlling the page. If this says "none" and the
+    // height is 874 across several launches, the worker was the cost.
+    ['service worker', navigator.serviceWorker?.controller ? 'CONTROLLING' : 'none'],
   ];
 }
 
