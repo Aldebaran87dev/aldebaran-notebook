@@ -144,7 +144,12 @@ export default function App() {
       )}
 
       {/* Content */}
-      <main style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+      {/* overflowY is 'scroll', not 'auto', on purpose. With 'auto' the app is
+          not a scroll container on first paint -- it renders LOADING with no
+          overflow -- and iOS does not always re-evaluate that once the entries
+          arrive, so the list came up unscrollable until a tab switch forced a
+          re-layout. 'scroll' makes it a scroll container from the first frame. */}
+      <main style={{ flex: 1, overflowY: 'scroll', WebkitOverflowScrolling: 'touch', minHeight: 0 }}>
         {view !== 'reading' && nb.loading && !nb.entries.length && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, letterSpacing: 2 }}>
             LOADING···

@@ -140,8 +140,16 @@ function viewportReport() {
     // never given. No CSS inside the app can reach it. If this is 0 the app owns
     // the whole screen; if it is not, that is an install-level problem.
     ['webview short by', window.screen.height - window.innerHeight],
+    // THE decisive number. screenY is where the app's y=0 sits on the physical
+    // screen. 0 means the app starts at the very top and the 62 it is short by
+    // is dead space at the BOTTOM, outside the app. 62 means iOS already placed
+    // the app below the island, the app reaches the bottom edge, and every inset
+    // padding inside it is being counted a second time.
+    ['screenY (app top)', typeof window.screenY === 'number' ? window.screenY : 'n/a'],
     ['root height', rootH],
     ['nav bottom', navBottom],
+    ['nav pad-bottom', nav ? getComputedStyle(nav).paddingBottom : 'n/a'],
+    ['header pad-top', document.querySelector('header') ? getComputedStyle(document.querySelector('header')).paddingTop : 'n/a'],
     // Compare like with like. The old row subtracted a PAGE coordinate from a
     // SCREEN one, so it reported 62 whenever iOS had inset the web view -- which
     // read as a gap that was not there. The real gap is inside the viewport.
