@@ -224,11 +224,16 @@ export default function App() {
 const headerStyle = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
   background: S.surface, borderBottom: `1px solid ${S.border}`,
-  paddingTop: 'calc(12px + env(safe-area-inset-top))',
-  paddingBottom: 12,
+  // The top pad is EXACTLY the safe-area inset -- 62pt here -- with no extra on
+  // top of it. That inset is already Apple's clearance for the Dynamic Island
+  // (which ends around 48pt), so the 12px that used to be added to it was pure
+  // margin on top of a margin. Do not go BELOW the inset: it is the guaranteed
+  // number, and shaving it is what put the title under the island before.
+  paddingTop: 'env(safe-area-inset-top)',
+  paddingBottom: 8,
   paddingLeft: 'max(16px, env(safe-area-inset-left))',
   paddingRight: 'max(16px, env(safe-area-inset-right))',
-  minHeight: 'calc(48px + env(safe-area-inset-top))',
+  minHeight: 'calc(44px + env(safe-area-inset-top))',
   flexShrink: 0,
 };
 
@@ -239,7 +244,11 @@ const navStyle = {
   // the screen bottom, so the app never reached the home indicator and this
   // padding was waste. Under display:fullscreen the app owns the whole screen,
   // so the home indicator sits over the nav and the inset is required again.
-  paddingTop: 4, paddingBottom: 'max(4px, env(safe-area-inset-bottom))',
+  // The 34pt bottom inset is Apple's conservative allowance; the home indicator
+  // itself only occupies the bottom ~21pt. Taking 12 off it still clears the
+  // indicator and gives the list 12pt more. The max() floor keeps this sane on a
+  // device with no inset at all, where the subtraction would go negative.
+  paddingTop: 2, paddingBottom: 'max(6px, calc(env(safe-area-inset-bottom) - 12px))',
   // In landscape the island takes a side edge, so keep the end tabs clear of it.
   paddingLeft: 'max(0px, env(safe-area-inset-left))',
   paddingRight: 'max(0px, env(safe-area-inset-right))',
