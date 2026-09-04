@@ -1,3 +1,8 @@
 node_modules
 dist
 .DS_Store
+
+# Data files live in the PRIVATE aldebaran-docs repo, never in this public tree.
+/*.json
+!/package.json
+!/package-lock.json
