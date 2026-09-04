@@ -154,7 +154,12 @@ function viewportReport() {
     // SCREEN one, so it reported 62 whenever iOS had inset the web view -- which
     // read as a gap that was not there. The real gap is inside the viewport.
     ['GAP below nav', window.innerHeight - navBottom],
-    ['view under status bar', window.innerHeight >= window.screen.height ? 'yes' : 'no (iOS inset it)'],
+    // screenY answers this directly. The old version guessed from the heights and
+    // was WRONG on the iPhone 17: it printed "no (iOS inset it)" while screenY 0
+    // proved the app was at the very top, under the island. A height difference
+    // says the window is SHORT; only screenY says where it starts.
+    ['view under status bar', window.screenY === 0 ? 'yes (starts at screen top)' : 'no, offset ' + window.screenY],
+    ['reaches screen bottom', (window.screenY + window.innerHeight) >= window.screen.height ? 'yes' : 'no'],
     ['standalone', window.navigator.standalone === true ? 'yes' : 'no'],
   ];
 }
