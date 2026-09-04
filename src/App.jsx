@@ -116,19 +116,21 @@ export default function App() {
     return null;
   }
 
-  // inset:0 fills the web view exactly, whatever size iOS made it. The nav is a
-  // plain flex child, so it needs no fixed positioning and main needs no padding
-  // to clear it.
+  // NOT position:fixed. A fixed root wrapping a scrollable child is the iOS
+  // combination that leaves the list unscrollable until something forces a
+  // repaint -- switching tabs and back was the workaround, and the bug came back
+  // the moment the service worker started serving the app faster. The original
+  // app used height:100dvh here and never had a scroll complaint. 100dvh and
+  // inset:0 resolve to the same 812 on this device, so nothing is lost.
   //
-  // THE REMAINING BOTTOM GAP IS NOT A CSS PROBLEM. Measured on Ted's iPhone 17:
-  // the screen is 874 tall, the web view is 812, and it starts at the top of the
-  // screen -- so the app is 62pt short at the bottom and no styling inside it can
-  // reach past its own web view. That 62 is exactly the top inset, which is the
-  // shape of a home-screen app running with meta tags captured at INSTALL time
-  // rather than the ones served now. Removing and re-adding the home-screen icon
-  // is the test. Do not chase this with more layout changes.
+  // THE BOTTOM GAP IS NOT A CSS PROBLEM AND NEVER WAS. Measured: screenY 0,
+  // innerHeight 812, screen.height 874. The app starts at the very top and its
+  // WINDOW ends 62pt above the screen bottom, so no styling inside it can reach
+  // that strip. The manifest's display:standalone is the only lever, and Ted has
+  // declined display:fullscreen because it hides the status bar. Do not chase
+  // this with layout changes again.
   return (
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
+    <div style={{ height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
       {/* Header */}
       <header style={headerStyle}>
         <div style={sideCol('flex-start')}>{headerLeft()}</div>
