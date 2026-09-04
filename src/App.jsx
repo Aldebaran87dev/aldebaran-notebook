@@ -17,6 +17,38 @@ export default function App() {
 
   useEffect(() => { nb.load(); rd.load(); }, []);
 
+  // Measure the window and keep measuring. 100dvh alone lands at 812 on first
+  // paint in this fullscreen web app and never catches up to the real 874, which
+  // is the bar-not-at-the-bottom report. innerHeight is right once the window
+  // settles, so track it.
+  //
+  // THIS IS NOT THE CHANGE THAT BROKE SCROLLING. That was position:fixed on the
+  // root, and it is gone -- the root stays static here. Every previous attempt
+  // at a measured height carried position:fixed with it, so the two were never
+  // separated until now. Keep them separate.
+  // NO JS SIZING. Measured directly with the window at 874 while a stale
+  // --app-h held 812: 100vh, 100dvh, 100svh, 100lvh, height:100% and a fixed
+  // inset:0 element ALL resolved to 874 immediately. The CSS units track the
+  // live viewport; a JS snapshot only tracks it if some event fires, and neither
+  // resize nor a ResizeObserver fired for that change. So the variable could
+  // only ever be the stale one. It is gone -- see the root element below.
+  //
+  // Instead, record the geometry AT LANDING so the next report is decisive.
+  // Reading it from Settings is useless on its own: navigating there forces a
+  // re-layout that would repair the very thing being measured.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const root = document.querySelector('#root > div');
+      window.__landing = {
+        innerH: window.innerHeight,
+        screenH: window.screen.height,
+        rootH: root ? Math.round(root.getBoundingClientRect().height) : 0,
+        screenY: window.screenY,
+      };
+    }, 700);
+    return () => clearTimeout(t);
+  }, []);
+
   // Lock the shell to a height measured in JS rather than trusting a CSS
   // viewport unit. On an iOS home-screen app, 100dvh -- and position:fixed with
   // inset:0 -- can still resolve against a viewport that excludes the bottom

@@ -147,6 +147,15 @@ function viewportReport() {
     // padding inside it is being counted a second time.
     ['screenY (app top)', typeof window.screenY === 'number' ? window.screenY : 'n/a'],
     ['root height', rootH],
+    // Non-zero means the root is not filling the window -- the bar-not-at-the-
+    // bottom symptom, seen as a number rather than as a screenshot.
+    ['root short of window', window.innerHeight - rootH],
+    // Captured 700ms after the app mounted, BEFORE any navigation. Reading the
+    // rows above from Settings cannot catch the landing bug, because getting
+    // here forces the re-layout that repairs it. THIS row is the evidence.
+    ['AT LANDING innerH/root', window.__landing ? `${window.__landing.innerH} / ${window.__landing.rootH}` : 'not captured'],
+    ['AT LANDING short by', window.__landing ? window.__landing.innerH - window.__landing.rootH : 'n/a'],
+    ['AT LANDING screen/screenY', window.__landing ? `${window.__landing.screenH} / ${window.__landing.screenY}` : 'n/a'],
     ['nav bottom', navBottom],
     ['nav pad-bottom', nav ? getComputedStyle(nav).paddingBottom : 'n/a'],
     ['header pad-top', document.querySelector('header') ? getComputedStyle(document.querySelector('header')).paddingTop : 'n/a'],
