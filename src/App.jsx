@@ -88,8 +88,15 @@ export default function App() {
     return null;
   }
 
+  // The root is position:fixed + inset:0 rather than height:100dvh. In a
+  // standalone iOS PWA, 100dvh can resolve against a stale viewport on first
+  // paint, so the app came up short of the bottom of the screen until something
+  // forced a re-layout. A fixed root is measured against the visual viewport
+  // itself and re-lays out on every change, so there is no first-paint gap.
+  // The nav is a plain flex child of that root, so it needs no fixed
+  // positioning and main needs no padding to clear it.
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: S.bg, fontFamily: S.font, color: S.text }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
       {/* Header */}
       <header style={headerStyle}>
         {headerLeft()}
@@ -104,8 +111,7 @@ export default function App() {
       )}
 
       {/* Content */}
-      {/* 64px clears the nav: 4 top + 44 button + 4 bottom + 1 border, with slack. */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: 'calc(64px + env(safe-area-inset-bottom))' }}>
+      <main style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
         {view !== 'reading' && nb.loading && !nb.entries.length && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, letterSpacing: 2 }}>
             LOADING···
@@ -180,6 +186,7 @@ const headerStyle = {
   paddingLeft: 'max(16px, env(safe-area-inset-left))',
   paddingRight: 'max(16px, env(safe-area-inset-right))',
   minHeight: 'calc(48px + env(safe-area-inset-top))',
+  flexShrink: 0,
 };
 
 const navStyle = {
@@ -189,7 +196,7 @@ const navStyle = {
   paddingLeft: 'max(0px, env(safe-area-inset-left))',
   paddingRight: 'max(0px, env(safe-area-inset-right))',
   background: S.surface, borderTop: `1px solid ${S.border}`,
-  position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10,
+  flexShrink: 0,
 };
 
 const navBtn = active => ({
