@@ -234,14 +234,12 @@ const headerStyle = {
 
 const navStyle = {
   display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-  // NO bottom safe-area inset. MEASURED on the iPhone 17: screenY 0, height 812,
-  // screen 874 -- the app starts at the very top and its window ENDS 62pt above
-  // the screen bottom, so it never reaches the home indicator and the 34pt inset
-  // was padding against something the app cannot touch. That is 34pt recovered.
-  // COUPLED: if the 62pt window shortfall is ever fixed (a manifest display
-  // change), the app WILL reach the bottom edge and this must go back to
-  // max(4px, env(safe-area-inset-bottom)).
-  paddingTop: 4, paddingBottom: 4,
+  // The bottom inset is BACK, and this is the coupled change the previous
+  // comment here promised. Under display:standalone the window ended 62pt above
+  // the screen bottom, so the app never reached the home indicator and this
+  // padding was waste. Under display:fullscreen the app owns the whole screen,
+  // so the home indicator sits over the nav and the inset is required again.
+  paddingTop: 4, paddingBottom: 'max(4px, env(safe-area-inset-bottom))',
   // In landscape the island takes a side edge, so keep the end tabs clear of it.
   paddingLeft: 'max(0px, env(safe-area-inset-left))',
   paddingRight: 'max(0px, env(safe-area-inset-right))',
