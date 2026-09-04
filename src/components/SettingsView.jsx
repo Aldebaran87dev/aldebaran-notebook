@@ -136,8 +136,10 @@ function viewportReport() {
     ['screen.height', window.screen.height],
     ['screen.availH', window.screen.availHeight],
     ['inset top/bot', `${insetTop} / ${insetBottom}`],
-    ['--app-h', getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim() || 'unset'],
-    ['--pad-top', getComputedStyle(document.documentElement).getPropertyValue('--pad-top').trim() || 'unset'],
+    // screen.height - innerHeight is the part of the screen the web view was
+    // never given. No CSS inside the app can reach it. If this is 0 the app owns
+    // the whole screen; if it is not, that is an install-level problem.
+    ['webview short by', window.screen.height - window.innerHeight],
     ['root height', rootH],
     ['nav bottom', navBottom],
     // Compare like with like. The old row subtracted a PAGE coordinate from a

@@ -24,33 +24,12 @@ export default function App() {
   // window.innerHeight is the LAYOUT viewport, so it is the full screen and does
   // NOT shrink when the keyboard opens (visualViewport does, which would squash
   // the whole app). Re-measured on every event that can change it.
-  useEffect(() => {
-    const setH = () => {
-      const el = document.documentElement;
-      el.style.setProperty('--app-h', `${window.innerHeight}px`);
-      // Does the web view actually extend under the status bar and island?
-      // MEASURED on Ted's iPhone 17: innerHeight 812 vs screen.height 874, a
-      // difference of exactly the 62pt top inset -- so iOS had ALREADY inset the
-      // view and the header's env(safe-area-inset-top) padding was counted a
-      // second time, wasting 62pt of screen at the top. env() reports the
-      // DEVICE's inset whether or not the view is drawing under it, so the inset
-      // alone cannot answer this; the heights can. Extends under => pad by the
-      // inset. Already inset => pad by nothing.
-      const under = window.innerHeight >= window.screen.height;
-      el.style.setProperty('--pad-top', under ? 'env(safe-area-inset-top)' : '0px');
-    };
-    setH();
-    // orientationchange fires before iOS has resized, so re-measure after it too.
-    const later = () => { setH(); setTimeout(setH, 300); };
-    window.addEventListener('resize', setH);
-    window.addEventListener('orientationchange', later);
-    window.addEventListener('pageshow', setH);
-    return () => {
-      window.removeEventListener('resize', setH);
-      window.removeEventListener('orientationchange', later);
-      window.removeEventListener('pageshow', setH);
-    };
-  }, []);
+  // No JS sizing. Two attempts at measuring the viewport made things worse: a
+  // measured height produced a main that could come up unscrollable on first
+  // paint, and deciding the header's top padding from innerHeight vs
+  // screen.height put the header back under the Dynamic Island. inset:0 fills
+  // whatever web view iOS hands the app, and the safe-area insets place the
+  // controls inside it. See the note on the root element below.
 
   function nav(v, id = null) { setView(v); setSelectedId(id); }
 
@@ -137,13 +116,19 @@ export default function App() {
     return null;
   }
 
-  // Height comes from --app-h, set in JS above; 100dvh is only the fallback for
-  // the first frame before that effect runs. inset:0 alone was not enough on the
-  // phone -- the gap came back -- so the measured value is the source of truth.
-  // The nav is a plain flex child of this root, so it needs no fixed positioning
-  // and main needs no padding to clear it.
+  // inset:0 fills the web view exactly, whatever size iOS made it. The nav is a
+  // plain flex child, so it needs no fixed positioning and main needs no padding
+  // to clear it.
+  //
+  // THE REMAINING BOTTOM GAP IS NOT A CSS PROBLEM. Measured on Ted's iPhone 17:
+  // the screen is 874 tall, the web view is 812, and it starts at the top of the
+  // screen -- so the app is 62pt short at the bottom and no styling inside it can
+  // reach past its own web view. That 62 is exactly the top inset, which is the
+  // shape of a home-screen app running with meta tags captured at INSTALL time
+  // rather than the ones served now. Removing and re-adding the home-screen icon
+  // is the test. Do not chase this with more layout changes.
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 'var(--app-h, 100dvh)', display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: S.bg, fontFamily: S.font, color: S.text }}>
       {/* Header */}
       <header style={headerStyle}>
         <div style={sideCol('flex-start')}>{headerLeft()}</div>
@@ -232,11 +217,11 @@ export default function App() {
 const headerStyle = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
   background: S.surface, borderBottom: `1px solid ${S.border}`,
-  paddingTop: 'calc(12px + var(--pad-top, 0px))',
+  paddingTop: 'calc(12px + env(safe-area-inset-top))',
   paddingBottom: 12,
   paddingLeft: 'max(16px, env(safe-area-inset-left))',
   paddingRight: 'max(16px, env(safe-area-inset-right))',
-  minHeight: 'calc(48px + var(--pad-top, 0px))',
+  minHeight: 'calc(48px + env(safe-area-inset-top))',
   flexShrink: 0,
 };
 
