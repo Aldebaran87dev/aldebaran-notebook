@@ -87,6 +87,16 @@ export default function SettingsView({ nb }) {
         <div>Build: {buildId()}</div>
       </div>
 
+      <div style={{ marginTop: 20, padding: 12, background: S.surface2, border: `1px solid ${S.border}`, borderRadius: 6 }}>
+        <div style={{ fontSize: 10, letterSpacing: 1.5, color: '#666', marginBottom: 8 }}>VIEWPORT</div>
+        {viewportReport().map(([k, v]) => (
+          <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, lineHeight: 1.9 }}>
+            <span style={{ color: S.muted }}>{k}</span>
+            <span style={{ color: k === 'GAP below nav' && v !== 0 ? S.danger : S.text }}>{String(v)}</span>
+          </div>
+        ))}
+      </div>
+
       <div style={{ marginTop: 20 }}>
         <button
           onClick={() => nb.load()}
@@ -98,6 +108,40 @@ export default function SettingsView({ nb }) {
       </div>
     </div>
   );
+}
+
+// Every candidate measure of "how tall is the screen", plus the safe-area insets,
+// read live. iOS reports these differently in a standalone PWA than in Safari,
+// and guessing which one is right has cost two rounds -- so the app says.
+function viewportReport() {
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;visibility:hidden;top:0;left:0;' +
+    'height:env(safe-area-inset-bottom);width:env(safe-area-inset-top)';
+  document.body.appendChild(probe);
+  const r = probe.getBoundingClientRect();
+  const insetBottom = Math.round(r.height);
+  const insetTop = Math.round(r.width);
+  probe.remove();
+
+  const root = document.querySelector('#root > div');
+  const nav = document.querySelector('nav');
+  const rootH = root ? Math.round(root.getBoundingClientRect().height) : 0;
+  const navBottom = nav ? Math.round(nav.getBoundingClientRect().bottom) : 0;
+
+  return [
+    ['innerHeight', window.innerHeight],
+    ['docEl.clientH', document.documentElement.clientHeight],
+    ['visualVP.h', window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a'],
+    ['screen.height', window.screen.height],
+    ['screen.availH', window.screen.availHeight],
+    ['inset top/bot', `${insetTop} / ${insetBottom}`],
+    ['--app-h', getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim() || 'unset'],
+    ['root height', rootH],
+    ['nav bottom', navBottom],
+    ['GAP below nav', window.screen.height - navBottom],
+    ['standalone', window.navigator.standalone === true ? 'yes' : 'no'],
+  ];
 }
 
 // The running bundle's content hash, read off the loaded script tag. Needs no
