@@ -14,32 +14,22 @@ createRoot(document.getElementById('root')).render(
 // so the worker has never registered in production and there has been no offline
 // support at all. import.meta.env.BASE_URL is vite's configured base, so this
 // stays correct in dev (/) and in production (/aldebaran-notebook/).
-// SERVICE WORKER REGISTRATION IS OFF, and this is a live experiment.
+// Service worker restored for offline support, Ted's call, after the real
+// window fix landed.
 //
-// Every measurement of the window on the phone, in order:
+// IT WAS BRIEFLY SUSPECTED AND IT WAS INNOCENT. The one 874 reading came from
+// the single launch where no worker had registered yet, so the worker looked
+// like the difference. Unregistering it and re-testing gave 812 on launch 5
+// with "service worker: none" in the panel -- falsified. The window shortfall
+// was iOS under-reporting its own viewport height, and it is handled in App.jsx
+// by --vh-extra. Do not re-suspect the worker for a layout symptom.
 //
-//   8:19  manifest fullscreen, FIRST launch after install, no SW yet -> 874
-//   8:40  manifest fullscreen, later launch, SW active               -> 812
-//   8:48  no manifest at all,  later launch, SW active               -> 812
-//   8:58  manifest fullscreen, launch 4,     SW active               -> 812
-//
-// The only 874 is the one launch where no service worker existed yet. The
-// manifest was fullscreen for both 874 and 812, and removing the manifest
-// changed nothing -- so display is not what decides this. What separates the
-// single good reading from every bad one is whether a service worker was
-// controlling the navigation.
-//
-// So: do not register, and actively unregister anything already installed,
-// because a registered worker keeps controlling launches until it is removed.
-// If 874 then holds across several launches, the worker was the cost and this
-// stays off. If it still reads 812, the worker is cleared and the next theory
-// gets tested without it in the way.
-//
-// Cost while off: no offline support. Updates are unaffected -- they were
-// network-first anyway.
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations()
-    .then(regs => Promise.all(regs.map(r => r.unregister())))
-    .then(() => caches?.keys?.().then(ks => Promise.all(ks.map(k => caches.delete(k)))))
-    .catch(() => {});
+// PROD only: in dev the modules are unhashed source files and the cache-first
+// asset rule serves them straight past Vite's hot reload.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .catch(err => console.warn('sw registration failed', err));
+  });
 }
