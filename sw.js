@@ -4,7 +4,7 @@
 // deploy's. It never actually ran in production (see the registration note in
 // main.jsx: it was requested from the domain root and 404'd), so nothing was
 // cached by it, but do not restore that strategy.
-const CACHE = 'notebook-v2';
+const CACHE = 'notebook-v3';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -44,18 +44,37 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Hashed build assets are immutable -- a new build gets a new filename -- so
-  // cache-first is correct and fast for them.
-  e.respondWith(
-    caches.match(e.request).then(hit => {
-      if (hit) return hit;
-      return fetch(e.request).then(res => {
+  // Cache-first ONLY for the hashed build assets, which are immutable because a
+  // new build gives them a new filename.
+  //
+  // Everything else -- manifest.json, the icons, sw.js itself -- keeps a FIXED
+  // name across deploys, so cache-first would pin the old copy forever. That
+  // matters concretely: changing the manifest's display mode is how the app's
+  // window size gets fixed, and a pinned manifest would silently defeat it.
+  const immutable = url.pathname.includes('/assets/');
+
+  if (immutable) {
+    e.respondWith(
+      caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
         if (res.ok) {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, copy));
         }
         return res;
-      });
-    })
+      }))
+    );
+    return;
+  }
+
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
