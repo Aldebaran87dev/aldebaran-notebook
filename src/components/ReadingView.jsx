@@ -50,7 +50,19 @@ function BookRow({ book, onToggle, index }) {
   const done = !!book.done;
   return (
     <div
-      onClick={() => onToggle(book.id)}
+      onClick={() => {
+        // A tap lands anywhere on the row, and either direction moves the book
+        // to the other tab -- easy to do by accident while scrolling a long
+        // shelf, and the row is gone before you see what you hit. So both
+        // directions ask, and the title goes in the prompt. Each wording names
+        // where the book ENDS UP, which is the part a mis-tap gets wrong.
+        // `confirm` is the same native dialog the DELETE control already uses.
+        const ask = done
+          ? `Move "${book.title}" back to ${book.shelf || 'the shelf'}?`
+          : `Mark "${book.title}" as done?`;
+        if (!confirm(ask)) return;
+        onToggle(book.id);
+      }}
       style={{
         display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 0',
         borderBottom: `1px solid ${S.border}`, cursor: 'pointer',
