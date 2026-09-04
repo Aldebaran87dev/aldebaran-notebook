@@ -104,7 +104,8 @@ export default function App() {
       )}
 
       {/* Content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}>
+      {/* 64px clears the nav: 4 top + 44 button + 4 bottom + 1 border, with slack. */}
+      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: 'calc(64px + env(safe-area-inset-bottom))' }}>
         {view !== 'reading' && nb.loading && !nb.entries.length && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, letterSpacing: 2 }}>
             LOADING···
@@ -165,15 +166,28 @@ export default function App() {
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
+// index.html sets viewport-fit=cover and a black-translucent status bar, so the
+// page draws UNDER the Dynamic Island. Without the top inset the header sits in
+// the island's reserved strip: it looks clipped AND the OS swallows taps on the
+// back arrow and SAVE, which is why they only worked in landscape (where the
+// top inset collapses and the island moves to the side edge). The side insets
+// keep those same controls clear of the island once the phone IS rotated.
 const headerStyle = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-  padding: '12px 16px', background: S.surface, borderBottom: `1px solid ${S.border}`,
-  minHeight: 48,
+  background: S.surface, borderBottom: `1px solid ${S.border}`,
+  paddingTop: 'calc(12px + env(safe-area-inset-top))',
+  paddingBottom: 12,
+  paddingLeft: 'max(16px, env(safe-area-inset-left))',
+  paddingRight: 'max(16px, env(safe-area-inset-right))',
+  minHeight: 'calc(48px + env(safe-area-inset-top))',
 };
 
 const navStyle = {
-  display: 'flex', justifyContent: 'space-around',
-  padding: '8px 0', paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+  display: 'flex', justifyContent: 'space-around', alignItems: 'center',
+  paddingTop: 4, paddingBottom: 'max(4px, env(safe-area-inset-bottom))',
+  // In landscape the island takes a side edge, so keep the end tabs clear of it.
+  paddingLeft: 'max(0px, env(safe-area-inset-left))',
+  paddingRight: 'max(0px, env(safe-area-inset-right))',
   background: S.surface, borderTop: `1px solid ${S.border}`,
   position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10,
 };
@@ -182,16 +196,21 @@ const navBtn = active => ({
   background: 'none', border: 'none',
   color: active ? S.accent : S.muted,
   fontFamily: S.font, fontSize: 11, letterSpacing: 1.5, cursor: 'pointer',
-  padding: '4px 16px',
+  padding: '0 12px', minHeight: 44,
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 });
 
+// 44pt is Apple's minimum touch target. These were 26x22 and 24 tall.
 const backBtn = {
   background: 'none', border: 'none', color: S.muted,
-  fontFamily: S.font, fontSize: 18, cursor: 'pointer', padding: '0 4px',
+  fontFamily: S.font, fontSize: 18, cursor: 'pointer', padding: 0,
+  minWidth: 44, minHeight: 44,
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 };
 
 const ghostBtn = {
   background: 'none', border: '1px solid',
   fontFamily: S.font, fontSize: 10, letterSpacing: 1, cursor: 'pointer',
-  padding: '3px 10px', borderRadius: 4,
+  padding: '0 14px', borderRadius: 4, minHeight: 44,
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
 };
