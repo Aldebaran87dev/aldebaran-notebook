@@ -173,8 +173,12 @@ function viewportReport() {
     // Which config path iOS is on. A manifest link means iOS follows the
     // manifest's display and ignores the status-bar meta, which is what insets
     // the window by 62. No link means the meta path, which gives the full screen.
-    ['manifest linked', document.querySelector('link[rel=manifest]') ? 'YES (insets the window)' : 'no (meta path)'],
-    ['status bar meta', document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content || 'absent'],
+    // display is the ONE key measured to change the window height:
+    // standalone 812, no manifest 812, fullscreen 874. If this row says
+    // fullscreen and innerHeight is still 812, iOS dropped it after install and
+    // that is a different problem from the manifest being wrong.
+    ['manifest display', window.__manifestDisplay || 'not read yet'],
+    ['launches seen', window.__launchCount ?? 1],
   ];
 }
 

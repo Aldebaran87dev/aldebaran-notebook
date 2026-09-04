@@ -46,6 +46,27 @@ export default function App() {
         screenY: window.screenY,
       };
     }, 700);
+
+    // Read the manifest the app is actually serving, and count launches. The
+    // window measured 874 on the first launch after a fullscreen install and
+    // 812 on a later one with no code change between, so the open question is
+    // whether the window shrinks on a LATER launch. A launch count next to the
+    // height answers that from a single screenshot.
+    const link = document.querySelector('link[rel=manifest]');
+    if (link) {
+      fetch(link.href)
+        .then(r => r.json())
+        .then(m => { window.__manifestDisplay = m.display || '(none)'; })
+        .catch(() => { window.__manifestDisplay = 'fetch failed'; });
+    } else {
+      window.__manifestDisplay = 'no manifest linked';
+    }
+    try {
+      const n = (Number(localStorage.getItem('nb_launches')) || 0) + 1;
+      localStorage.setItem('nb_launches', String(n));
+      window.__launchCount = n;
+    } catch { window.__launchCount = 'n/a'; }
+
     return () => clearTimeout(t);
   }, []);
 

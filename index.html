@@ -5,31 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#1a1a1a" />
     <!--
-      NO MANIFEST LINK, deliberately. This is the whole fix for the 62pt strip.
+      THE MANIFEST IS REQUIRED, and display:fullscreen inside it is the only
+      thing measured to give this app the full 874pt screen.
 
-      iOS has two config paths for a home-screen web app: the Apple meta tags
-      below, and a web app manifest. When a manifest declares `display`, iOS
-      follows THAT and ignores apple-mobile-web-app-status-bar-style -- and
-      `standalone` is the mode that insets the web view 62pt below the status
-      bar, which is where the strip came from.
+      Three configurations have now been tested on the device, all with the
+      Apple meta tags below present and unchanged:
 
-      MEASURED, and this is what identified it: at 8:19, immediately after a
-      fresh Add to Home Screen, innerHeight was 874 with the status bar VISIBLE
-      -- which is black-translucent behaviour, not fullscreen (fullscreen hides
-      the status bar). By 8:40 the same install reported 812. iOS had fetched
-      the manifest asynchronously, and once it had it, the manifest's display
-      won and the window shrank. Nothing in the code changed between those two
-      readings.
+        manifest display:standalone   -> innerHeight 812  (62 short)
+        NO manifest link at all       -> innerHeight 812  (62 short)
+        manifest display:fullscreen   -> innerHeight 874  (full screen)
 
-      Removing the link leaves only the meta path, which is the one that
-      produced 874. Everything the manifest supplied has an Apple equivalent
-      already present: capable, status-bar-style, title, and apple-touch-icon.
-      public/manifest.json is left in place but unreferenced.
+      The middle row is the one that settles it. With no manifest, iOS had
+      nothing but apple-mobile-web-app-status-bar-style: black-translucent to
+      go on, and it STILL inset the window by 62 -- so that meta tag no longer
+      controls the window height. Apple deprecated it in favour of the
+      manifest, and this device behaves accordingly. The tags stay because they
+      still supply the app title and the standalone launch; they are simply not
+      the lever for height.
 
-      Cost: no installable PWA on Android or desktop. This app is used on one
-      iPhone. Restore the link if that ever changes, and expect the strip back.
+      Do not remove this link again, and do not change display away from
+      fullscreen, without re-measuring innerHeight against screen.height in the
+      Settings VIEWPORT panel.
     -->
-    <!-- <link rel="manifest" href="/manifest.json" /> -->
+    <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
