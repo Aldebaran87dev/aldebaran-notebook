@@ -6,16 +6,19 @@ import DetailView from './components/DetailView';
 import EditView from './components/EditView';
 import SettingsView from './components/SettingsView';
 import ReadingView from './components/ReadingView';
+import BriefView from './components/BriefView';
+import { useBrief } from './hooks/useBrief';
 import { S } from './styles';
 
 export default function App() {
   const nb = useNotebook();
   const rd = useReading();
+  const br = useBrief();
   const [view, setView]         = useState('list');
   const [selectedId, setSelectedId] = useState(null);
   const [addOpen, setAddOpen]   = useState(false);   // reading-tab add form
 
-  useEffect(() => { nb.load(); rd.load(); }, []);
+  useEffect(() => { nb.load(); rd.load(); br.load(); }, []);
 
   // Measure the window and keep measuring. 100dvh alone lands at 812 on first
   // paint in this fullscreen web app and never catches up to the real 874, which
@@ -127,7 +130,9 @@ export default function App() {
   // whatever web view iOS hands the app, and the safe-area insets place the
   // controls inside it. See the note on the root element below.
 
-  function nav(v, id = null) { setView(v); setSelectedId(id); }
+  // The Brief tab reloads on every visit, so a phone that kept the app open
+  // overnight still shows the new day's brief.
+  function nav(v, id = null) { setView(v); setSelectedId(id); if (v === 'brief') br.load(); }
 
   const selected = selectedId ? nb.entries.find(e => e.id === selectedId) : null;
 
@@ -142,6 +147,7 @@ export default function App() {
     }
     if (view === 'list')    return <span style={countText}>{nb.entries.length} entries</span>;
     if (view === 'reading') return <span style={countText}>{rd.books.length} books</span>;
+    if (view === 'brief' && br.brief) return <span style={countText}>{br.brief.date}</span>;
     return null;
   }
 
@@ -152,7 +158,8 @@ export default function App() {
     view === 'add'      ? 'ADD ENTRY' :
     view === 'edit'     ? 'EDIT'      :
     view === 'settings' ? 'SETTINGS'  :
-    view === 'reading'  ? 'READING'   : 'TO DO';
+    view === 'reading'  ? 'READING'   :
+    view === 'brief'    ? 'BRIEF'     : 'TO DO';
 
   function headerCenter() {
     return <span style={titleText}>{viewTitle}</span>;
@@ -220,9 +227,9 @@ export default function App() {
       </header>
 
       {/* Error banner */}
-      {(view === 'reading' ? rd.error : nb.error) && (
+      {(view === 'reading' ? rd.error : view === 'brief' ? br.error : nb.error) && (
         <div style={{ background: '#2a1515', color: S.danger, padding: '8px 16px', fontSize: 12, borderBottom: `1px solid ${S.danger}33` }}>
-          {view === 'reading' ? rd.error : nb.error}
+          {view === 'reading' ? rd.error : view === 'brief' ? br.error : nb.error}
         </div>
       )}
 
@@ -233,13 +240,20 @@ export default function App() {
           arrive, so the list came up unscrollable until a tab switch forced a
           re-layout. 'scroll' makes it a scroll container from the first frame. */}
       <main style={{ flex: 1, overflowY: 'scroll', WebkitOverflowScrolling: 'touch', minHeight: 0 }}>
-        {view !== 'reading' && nb.loading && !nb.entries.length && (
+        {view === 'brief' && br.brief && <BriefView brief={br.brief} />}
+        {view === 'brief' && !br.brief && !br.error && (
+          <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, lineHeight: 2 }}>
+            {br.loading ? 'LOADING···' : 'No brief yet.'}
+          </div>
+        )}
+
+        {!['reading', 'brief'].includes(view) && nb.loading && !nb.entries.length && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, letterSpacing: 2 }}>
             LOADING···
           </div>
         )}
 
-        {view !== 'reading' && !nb.loading && !nb.entries.length && !nb.error && (
+        {!['reading', 'brief'].includes(view) && !nb.loading && !nb.entries.length && !nb.error && (
           <div style={{ textAlign: 'center', padding: 48, color: S.muted, fontSize: 12, lineHeight: 2 }}>
             <div>No entries.</div>
             <div>Add a GitHub PAT in Settings, then reload.</div>
@@ -287,6 +301,7 @@ export default function App() {
       {/* Bottom nav */}
       <nav style={navStyle}>
         <button onClick={() => nav('list')}     aria-label="To do"    title="To do"    style={navBtn(['list','detail','edit','add'].includes(view))}><CheckboxIcon /></button>
+        <button onClick={() => nav('brief')}    aria-label="Brief"    title="Brief"    style={navBtn(view === 'brief')}><SunIcon /></button>
         <button onClick={() => nav('reading')}  aria-label="Reading"  title="Reading"  style={navBtn(view === 'reading')}><GlassesIcon /></button>
         <button onClick={() => nav('settings')} aria-label="Settings" title="Settings" style={navBtn(view === 'settings')}><GearIcon /></button>
       </nav>
@@ -377,6 +392,15 @@ const GlassesIcon = () => (
     <path d="M11.2 14.2c.5-1 1.6-1 2.1 0" />
     <path d="M2.4 14.6V10.4a3.4 3.4 0 0 1 3.4-3.4" />
     <path d="M21.6 14.6V10.4a3.4 3.4 0 0 0-3.4-3.4" />
+  </svg>
+);
+
+// A small sun on a horizon line: the morning brief.
+const SunIcon = () => (
+  <svg {...iconProps}>
+    <path d="M7 16a5 5 0 0 1 10 0" />
+    <path d="M3 19.5h18" />
+    <path d="M12 5.5v2.5M5.6 8.6l1.8 1.8M18.4 8.6l-1.8 1.8" />
   </svg>
 );
 

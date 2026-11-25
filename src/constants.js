@@ -28,6 +28,14 @@ export const READING_DEFAULTS = {
   path:  "reading.json",
 };
 
+// ── Daily brief ───────────────────────────────────────────────────────────────
+// Same private repo. brief.py on the Mac writes it each weekday; the app only reads.
+export const BRIEF_DEFAULTS = {
+  owner: "Aldebaran87dev",
+  repo:  "aldebaran-docs",
+  path:  "brief.json",
+};
+
 export const SHELVES      = ["nonfiction", "fiction"];
 export const BLOCK_LABELS = { 1: "Quick Wins", 2: "Medium Depth", 3: "Heavy" };
 export const BLOCK_CLR    = { 1: "#6dde9e", 2: "#e8c547", 3: "#ff6b6b" };
